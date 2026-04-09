@@ -1,11 +1,13 @@
 import { Button } from "@/components/Button";
 import { InputField } from "@/components/InputFields";
 import { adminEmail, adminPassword } from "@/constants/admin";
+import { ROUTES } from "@/constants/routesName";
 import { PLAINTEXT } from "@/constants/text";
+import { AdminContext } from "@/context/AdminContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -18,7 +20,7 @@ const login = () => {
   const [passwordRequiredError, setPasswordRequiredError] =
     useState<string>("");
   const router = useRouter();
-
+  const { setIsAdmin } = useContext(AdminContext);
   const validation = () => {
     let isValid = true;
     if (!email) {
@@ -45,7 +47,8 @@ const login = () => {
     } else {
       await AsyncStorage.setItem("isLoggedIn", "true");
       await AsyncStorage.setItem("isAdmin", "true");
-      router.replace("/");
+      setIsAdmin(true);
+      router.replace(`/${ROUTES.Home}`);
     }
   };
 
@@ -86,7 +89,7 @@ const login = () => {
             style={styles.loginBtn}
             onPress={handleLogin}
           >
-            Login
+            {PLAINTEXT.login.Login}
           </Button>
         </View>
       </View>

@@ -1,13 +1,13 @@
 import { COLORS } from "@/constants/color";
 import React from "react";
 import {
-    ActivityIndicator,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    type StyleProp,
-    type TextStyle,
-    type ViewStyle,
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  type StyleProp,
+  type TextStyle,
+  type ViewStyle,
 } from "react-native";
 
 type ButtonProps = {
@@ -17,6 +17,8 @@ type ButtonProps = {
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
+  isDanger?: boolean;
+  isDiscard?: boolean;
 };
 
 export const Button = ({
@@ -26,18 +28,42 @@ export const Button = ({
   disabled = false,
   style: customStyle,
   textStyle: customTextStyle,
+  isDanger = false,
+  isDiscard = false,
 }: ButtonProps) => {
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.75}
-      style={[style.btn, customStyle]}
+      style={[
+        style.btn,
+        customStyle,
+        isDanger && {
+          borderWidth: 1,
+          borderColor: "#E57373",
+          backgroundColor: COLORS.card,
+        },
+        isDiscard && {
+          borderWidth: 1,
+          borderColor: "#E0E0E0",
+          backgroundColor: COLORS.card,
+        },
+      ]}
     >
       {loading ? (
         <ActivityIndicator color="white" size="small" />
       ) : (
-        <Text style={[style.btnText, customTextStyle]}>{children}</Text>
+        <Text
+          style={[
+            style.btnText,
+            customTextStyle,
+            isDanger && { color: COLORS.danger },
+            isDiscard && { color: COLORS.muted },
+          ]}
+        >
+          {children}
+        </Text>
       )}
     </TouchableOpacity>
   );
@@ -52,7 +78,7 @@ const style = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    elevation: 4,
+    // elevation: 4,
   },
   btnText: {
     color: "white",
