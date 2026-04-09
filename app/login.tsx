@@ -1,9 +1,9 @@
 import { Button } from "@/components/Button";
 import { InputField } from "@/components/InputFields";
-import { adminEmail, adminPassword } from "@/constants/admin";
 import { ROUTES } from "@/constants/routesName";
 import { PLAINTEXT } from "@/constants/text";
-import { AdminContext } from "@/context/AdminContext";
+import { UserContext } from "@/context/UserContext";
+import { signInUser } from "@/utils/auth";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
@@ -20,7 +20,7 @@ const login = () => {
   const [passwordRequiredError, setPasswordRequiredError] =
     useState<string>("");
   const router = useRouter();
-  const { setIsAdmin } = useContext(AdminContext);
+  const { setUser } = useContext(UserContext);
   const validation = () => {
     let isValid = true;
     if (!email) {
@@ -40,15 +40,43 @@ const login = () => {
     setError("");
     const isValid = validation();
     if (!isValid) return;
-    setLoading(true);
-    if (email !== adminEmail || password !== adminPassword) {
-      setError("Invalid login credentials");
-      setLoading(false);
-    } else {
+
+    try {
+      setLoading(true);
+      const data = await signInUser(email, password);
+      if (data) {
+        if (data.user) {
+          const currentUser = {
+            age: data.user.age,
+            email: data.user.email,
+            fullName: data.user.fullName,
+            profession: data.user.profession,
+            role: data.user.role,
+            userId: data.user.userId,
+          };
+          await AsyncStorage.setItem("currUser", JSON.stringify(currentUser));
+
+          setUser(currentUser);
+        } else {
+          const currentUser = {
+            age: "",
+            email: data.admin.adminEmail,
+            userId: data.admin.adminId,
+            fullName: "",
+            profession: "",
+            role: data.admin.role as "ADMIN" | "USER",
+          };
+          await AsyncStorage.setItem("currUser", JSON.stringify(currentUser));
+          setUser(currentUser);
+        }
+      }
       await AsyncStorage.setItem("isLoggedIn", "true");
-      await AsyncStorage.setItem("isAdmin", "true");
-      setIsAdmin(true);
       router.replace(`/${ROUTES.Home}`);
+      setLoading(true);
+    } catch (error: any) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 

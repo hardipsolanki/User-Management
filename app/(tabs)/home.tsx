@@ -3,7 +3,7 @@ import ProfileCart from "@/components/ProfileCart";
 import { COLORS } from "@/constants/color";
 import { ROUTES } from "@/constants/routesName";
 import { PLAINTEXT } from "@/constants/text";
-import { AdminContext } from "@/context/AdminContext";
+import { UserContext } from "@/context/UserContext";
 import { Link, useRouter } from "expo-router";
 import React, { useContext } from "react";
 import { StyleSheet, Text, View } from "react-native";
@@ -11,8 +11,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const Index = () => {
   const router = useRouter();
-  const { isAdmin } = useContext(AdminContext);
-  console.log(isAdmin);
+  const { user, profiles } = useContext(UserContext);
+  console.log("users: ", user);
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.profileHeader}>
@@ -25,7 +25,7 @@ const Index = () => {
         </View>
       </View>
       <View style={styles.mainConatiner}>
-        {isAdmin && (
+        {user.role === "ADMIN" && (
           <Button onPress={() => router.push(`/${ROUTES.AddProfile}`)}>
             Add New Profile
           </Button>

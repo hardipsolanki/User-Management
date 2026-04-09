@@ -1,25 +1,108 @@
 import { COLORS } from "@/constants/color";
+import { ROUTES } from "@/constants/routesName";
 import { PLAINTEXT } from "@/constants/text";
+import { UserContext } from "@/context/UserContext";
+import { AddUser, User } from "@/types/user";
 import { generateRandomBgColor } from "@/utils/generateRandomBgColor";
+import { addProfile } from "@/utils/profile";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import React from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import React, { useContext, useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Button } from "./Button";
 import GenerateUserLogo from "./GenerateUserLogo";
 import { UnderlineInput } from "./UserLineTextInput";
 
-const AddProfileForm = () => {
+const AddProfileForm = ({ user }: { user?: User }) => {
+  const router = useRouter();
+  const [fieldsData, setFieldsData] = useState<AddUser>({
+    fullName: "",
+    email: "",
+    age: "",
+    password: "",
+    role: "USER",
+    profession: "",
+    bgColor: "",
+  });
+  const [error, setError] = useState("");
+  const [fullNameErrMsg, setFullNameErrMsg] = useState("");
+  const [emailErrMsg, setEmailErrMsg] = useState("");
+  const [ageErrMsg, setAgeErrMsg] = useState("");
+  const [roleErrMsg, setRoleErrMsg] = useState("");
+  const [passwordErrMsg, setPasswordErrMsg] = useState("");
+  const [bgColor, setBgColor] = useState(COLORS.primary);
+  const [loading, setLoading] = useState<boolean>(false);
+  const { setProfile } = useContext(UserContext);
+  const validation = () => {
+    let isValid = true;
+    if (!fieldsData.fullName) {
+      isValid = false;
+      setFullNameErrMsg(PLAINTEXT.addProfile.fullNameReqErr);
+    }
+    if (!fieldsData.email) {
+      isValid = false;
+      setEmailErrMsg(PLAINTEXT.addProfile.emailReqErr);
+    }
+    if (!fieldsData.age) {
+      isValid = false;
+      setAgeErrMsg(PLAINTEXT.addProfile.ageReqErr);
+    }
+    if (!fieldsData.role) {
+      isValid = false;
+      setRoleErrMsg(PLAINTEXT.addProfile.roleReqErr);
+    }
+    if (!fieldsData.password) {
+      isValid = false;
+      setPasswordErrMsg(PLAINTEXT.addProfile.passwordReqErr);
+    }
+    return isValid;
+  };
+
+  const onSubmit = async () => {
+    const isValid = validation();
+    if (!isValid) return;
+    if (user?.userId) {
+      // update logic
+    } else {
+      try {
+        setLoading(true);
+        const data = await addProfile({ ...fieldsData });
+        if (data.data) {
+          setProfile({ ...data.data, bgColor: bgColor });
+          router.push(`/${ROUTES.Tabs}/${ROUTES.Home}`);
+        }
+        setLoading(false);
+      } catch (error: any) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.profileHeader}>
         <View style={styles.headerInnerConatiner}>
           <View>
-            <Text style={styles.profileText}>{PLAINTEXT.addProfile.add}</Text>
+            <Text style={styles.profileText}>
+              {user?.userId
+                ? PLAINTEXT.EditProfile.edit
+                : PLAINTEXT.addProfile.add}
+            </Text>
             <View style={styles.profilesDetailsConatiner}>
               <View style={styles.dotAndProfilesCount}>
                 <Text style={styles.profileCountText}>
-                  {PLAINTEXT.addProfile.create}
+                  {user?.userId
+                    ? PLAINTEXT.EditProfile.text
+                    : PLAINTEXT.addProfile.add}
                 </Text>
               </View>
             </View>
@@ -33,8 +116,11 @@ const AddProfileForm = () => {
       <ScrollView style={styles.scrollArea}>
         <View style={styles.mainContainer}>
           <View style={styles.userDetails}>
+            {error && (
+              <Text style={{ color: "red", marginVertical: 8 }}>{error}</Text>
+            )}
             <GenerateUserLogo
-              bgColor={COLORS.primary}
+              bgColor={bgColor}
               firstLatter="H"
               secondLatter="S"
               layoutSize={90}
@@ -42,34 +128,82 @@ const AddProfileForm = () => {
             />
             <Text style={styles.profileChangeText}>Tap to change avatar</Text>
             <View style={styles.availableAvatarConatiner}>
-              {[0, 1, 2, 3, 4].map((_, idx) => (
-                <GenerateUserLogo
-                  key={idx}
-                  bgColor={generateRandomBgColor()}
-                  firstLatter="H"
-                  secondLatter="S"
-                  layoutSize={50}
-                  fontSize={9}
-                />
-              ))}
+              {[0, 1, 2, 3, 4].map((_, idx) => {
+                const bgColor = generateRandomBgColor();
+                return (
+                  <TouchableOpacity
+                    onPress={() => setBgColor(bgColor)}
+                    key={idx}
+                  >
+                    <GenerateUserLogo
+                      bgColor={bgColor}
+                      firstLatter="H"
+                      secondLatter="S"
+                      layoutSize={50}
+                      fontSize={9}
+                    />
+                  </TouchableOpacity>
+                );
+              })}
             </View>
           </View>
           <View style={styles.userDetailsAndActionConatiner}>
-            <UnderlineInput onChange={() => {}} value="" label="Full Name" />
-            <UnderlineInput onChange={() => {}} value="" label="Age" />
-            <UnderlineInput onChange={() => {}} value="" label="Role" />
+            <UnderlineInput
+              onChange={(text) => {
+                setFieldsData((prev) => ({ ...prev, fullName: text }));
+              }}
+              value={fieldsData.fullName}
+              label="Full Name"
+              error={fullNameErrMsg}
+            />
+            <UnderlineInput
+              onChange={(text) =>
+                setFieldsData((prev) => ({ ...prev, email: text }))
+              }
+              value={fieldsData.email}
+              label="Email"
+              error={emailErrMsg}
+            />
+            <UnderlineInput
+              onChange={(text) =>
+                setFieldsData((prev) => ({ ...prev, age: text }))
+              }
+              value={String(fieldsData.age)}
+              label="Age"
+              error={ageErrMsg}
+            />
+            <UnderlineInput
+              onChange={(text) => {
+                setFieldsData((prev) => ({ ...prev, Profession: text }));
+              }}
+              value={fieldsData.profession}
+              label="Role"
+              error={roleErrMsg}
+            />
+            <UnderlineInput
+              onChange={(text) => {
+                setFieldsData((prev) => ({ ...prev, password: text }));
+              }}
+              value={fieldsData.password}
+              label="Password"
+              error={passwordErrMsg}
+            />
           </View>
         </View>
       </ScrollView>
 
       {/* Action Button */}
       <View style={styles.actionBtnConatiner}>
-        <Button onPress={() => {}}>
-          {PLAINTEXT.addProfile.createProfileBtn}
+        <Button loading={loading} onPress={onSubmit}>
+          {!user
+            ? PLAINTEXT.addProfile.createProfileBtn
+            : PLAINTEXT.EditProfile.editBtn}
         </Button>
-        <Button isDiscard onPress={() => {}}>
-          Discard
-        </Button>
+        {user?.userId && (
+          <Button isDiscard onPress={() => {}}>
+            Discard
+          </Button>
+        )}
       </View>
     </View>
   );

@@ -4,12 +4,15 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import GenerateUserLogo from "./GenerateUserLogo";
 
-const ProfileCart = () => {
+type ProfileCartProps = {
+  bgColor?: string;
+};
+const ProfileCart = ({ bgColor }: ProfileCartProps) => {
   return (
     <View style={styles.conatainer}>
       <View style={styles.logoAndUserTextCoantiner}>
         <GenerateUserLogo
-          bgColor={COLORS.primary}
+          bgColor={bgColor ? bgColor : COLORS.primary}
           firstLatter="H"
           secondLatter="S"
           layoutSize={80}

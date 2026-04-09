@@ -36,14 +36,14 @@ export const InputField = ({
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
   return (
-    <View style={style.lableAndInputConatiner}>
-      <View style={style.labelAndIconConatiner}>
+    <View style={styles.lableAndInputConatiner}>
+      <View style={styles.labelAndIconConatiner}>
         {icon && icon}
-        <Text style={style.label}>{label}</Text>
+        <Text style={styles.label}>{label}</Text>
       </View>
       <View>
         <TextInput
-          style={[style.input, customStyle, error && { borderColor: "red" }]}
+          style={[styles.input, customStyle, error && { borderColor: "red" }]}
           placeholder={placeHolder}
           value={value}
           secureTextEntry={isPassword && !showPassword}
@@ -52,7 +52,7 @@ export const InputField = ({
           onChangeText={(text) => onChange(text)}
         />
         {isPassword && (
-          <View style={style.passwordHideShowContainer}>
+          <View style={styles.passwordHideShowContainer}>
             {showPassword ? (
               <TouchableOpacity onPress={() => setShowPassword(false)}>
                 <Ionicons name="eye-off" size={17} color="black" />
@@ -66,7 +66,7 @@ export const InputField = ({
         )}
         {error && (
           <View>
-            <Text style={style.errorMessage}>{error}</Text>
+            <Text style={styles.errorMessage}>{error}</Text>
           </View>
         )}
       </View>
@@ -74,7 +74,7 @@ export const InputField = ({
   );
 };
 
-const style = StyleSheet.create({
+const styles = StyleSheet.create({
   lableAndInputConatiner: {
     gap: 5,
   },

@@ -27,9 +27,16 @@ export const PLAINTEXT = {
     addProfile: {
         createProfileBtn: "Create Profile",
         add: "Add Profile",
-        create: "Create new profile"
+        create: "Create new profile",
+        fullNameReqErr: "Full Name is required",
+        emailReqErr: "Email is required",
+        ageReqErr: "Age is required",
+        roleReqErr: "Role is required",
+        passwordReqErr: "Password is required",
     },
     EditProfile: {
+        edit: "Update Profile",
+        text: "Edit user profile",
         editBtn: "Save Change",
         discardBtn: "Discard"
     }

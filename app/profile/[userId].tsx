@@ -2,14 +2,14 @@ import { Button } from "@/components/Button";
 import GenerateUserLogo from "@/components/GenerateUserLogo";
 import { COLORS } from "@/constants/color";
 import { PLAINTEXT } from "@/constants/text";
-import { AdminContext } from "@/context/AdminContext";
+import { UserContext } from "@/context/UserContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import React, { useContext } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Profile = () => {
-  const { isAdmin } = useContext(AdminContext);
+  const { user } = useContext(UserContext);
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.profileHeader}>
@@ -59,7 +59,7 @@ const Profile = () => {
               <Text style={styles.field}>#TO878FA</Text>
             </View>
           </View>
-          {isAdmin && (
+          {user.role === "ADMIN" && (
             <>
               <Button onPress={() => {}}>
                 {PLAINTEXT.singleProfile.editBtn}

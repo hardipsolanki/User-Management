@@ -10,6 +10,7 @@ type UnderlineInputProps = {
   keyboardType?: "default" | "numeric" | "email-address";
   editable?: boolean;
   style?: any;
+  error?: string;
 };
 
 export const UnderlineInput = ({
@@ -20,6 +21,7 @@ export const UnderlineInput = ({
   keyboardType = "default",
   editable = true,
   style: customStyle,
+  error,
 }: UnderlineInputProps) => {
   return (
     <View style={[styles.container, customStyle]}>
@@ -36,6 +38,12 @@ export const UnderlineInput = ({
       />
 
       <View style={styles.border} />
+
+      {error && (
+        <View>
+          <Text style={styles.errorMessage}>{error}</Text>
+        </View>
+      )}
     </View>
   );
 };
@@ -66,5 +74,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#E0E0E0",
     marginTop: 6,
+  },
+  errorMessage: {
+    color: "red",
+    padding: 6,
   },
 });
