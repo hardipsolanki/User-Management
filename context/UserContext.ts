@@ -7,6 +7,8 @@ export const UserContext = createContext<
         setUser: (value: Omit<User, "password">) => void,
         profiles: User[],
         setProfile: (value: User) => void
+        deleteProfile: (profileId: string) => void,
+        updateProfile: (profile: User) => void
     }>({
         user: {
             userId: "",
@@ -14,9 +16,12 @@ export const UserContext = createContext<
             email: "",
             age: "",
             role: "USER",
-            profession: ""
+            profession: "",
+            bgColor: ""
         },
         profiles: [],
         setProfile: () => { },
-        setUser: () => { }
+        deleteProfile: () => { },
+        setUser: () => { },
+        updateProfile: () => { }
     });

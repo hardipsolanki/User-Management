@@ -5,5 +5,6 @@ export enum ROUTES {
     Setting = "setting",
     Tabs = '(tabs)',
     SingleUset = "profile/[userId]",
-    AddProfile = "addProfile"
+    AddProfile = "addProfile",
+    EdtiProfile = "editProfile"
 }

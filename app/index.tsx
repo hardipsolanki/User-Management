@@ -11,7 +11,7 @@ const index = () => {
         const isLoggedIn = await AsyncStorage.getItem("isLoggedIn");
 
         // add ! this for test
-        if (isLoggedIn === "true") {
+        if (isLoggedIn !== "true") {
           return router.push(`/${ROUTES.Login}`);
         }
         router.push(`/${ROUTES.Tabs}/${ROUTES.Home}`);

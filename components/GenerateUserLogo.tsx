@@ -2,16 +2,14 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 type GenerateUserLogo = {
-  firstLatter: string;
-  secondLatter: string;
+  fullName: string;
   fontSize: number;
   bgColor: string;
   layoutSize?: number;
 };
 
 const GenerateUserLogo = ({
-  firstLatter,
-  secondLatter,
+  fullName,
   bgColor,
   fontSize,
   layoutSize = 50,
@@ -23,8 +21,12 @@ const GenerateUserLogo = ({
         { width: layoutSize, height: layoutSize, backgroundColor: bgColor },
       ]}
     >
-      <Text style={[styles.firstLatter, { fontSize }]}>{firstLatter}</Text>
-      <Text style={[styles.secondLatter, { fontSize }]}>{secondLatter}</Text>
+      <Text style={[styles.firstLatter, { fontSize }]}>
+        {fullName?.charAt(0)}
+      </Text>
+      <Text style={[styles.secondLatter, { fontSize }]}>
+        {fullName?.split(" ")?.[1]?.charAt(0)}
+      </Text>
     </View>
   );
 };

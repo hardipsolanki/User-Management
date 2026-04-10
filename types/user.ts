@@ -6,7 +6,7 @@ export interface User {
     role?: "ADMIN" | "USER",
     password: string;
     profession: string;
-    bgColor?: string
+    bgColor: string
 }
 
 

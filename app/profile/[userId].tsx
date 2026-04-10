@@ -1,15 +1,36 @@
 import { Button } from "@/components/Button";
 import GenerateUserLogo from "@/components/GenerateUserLogo";
 import { COLORS } from "@/constants/color";
+import { ROUTES } from "@/constants/routesName";
 import { PLAINTEXT } from "@/constants/text";
 import { UserContext } from "@/context/UserContext";
+import { deleteProfile } from "@/utils/profile";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useContext } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Profile = () => {
-  const { user } = useContext(UserContext);
+  const { userId } = useLocalSearchParams();
+  const router = useRouter();
+  const normalizedId = Array.isArray(userId) ? userId[0] : userId;
+  const {
+    profiles,
+    user: currUser,
+    deleteProfile: deleteFromState,
+  } = useContext(UserContext);
+  const user = profiles.find((p) => p.userId === normalizedId);
+
+  const handleDeleteProfile = async (profileId: string) => {
+    try {
+      deleteFromState(profileId);
+      await deleteProfile(profileId);
+      router.replace(`/${ROUTES.Home}`);
+    } catch (error: any) {
+      console.log("error while delete profile", error.message);
+    }
+  };
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.profileHeader}>
@@ -20,51 +41,65 @@ const Profile = () => {
             </Text>
             <View style={styles.profilesDetailsConatiner}>
               <View style={styles.dotAndProfilesCount}>
-                <Text style={styles.profileCountText}>Hardip Solanki</Text>
+                <Text style={styles.profileCountText}>{user?.fullName}</Text>
               </View>
             </View>
           </View>
-          <View>
-            <Ionicons name="arrow-back" size={20} color={COLORS.muted} />
+          <View style={styles.backArrow}>
+            <TouchableOpacity
+              onPress={() => router.push(`/${ROUTES.Tabs}/${ROUTES.Home}`)}
+            >
+              <Ionicons name="arrow-back" size={20} color={COLORS.muted} />
+            </TouchableOpacity>
           </View>
         </View>
       </View>
       <View style={styles.mainContainer}>
         <View style={styles.userDetails}>
           <GenerateUserLogo
-            bgColor={COLORS.primary}
-            firstLatter="H"
-            secondLatter="S"
+            bgColor={user?.bgColor || COLORS.primary}
+            fullName={user?.fullName || ""}
             layoutSize={110}
             fontSize={40}
           />
-          <Text style={styles.profileText}>Hardp Solanki</Text>
+          <Text style={styles.profileText}>{user?.fullName}</Text>
         </View>
         <View style={styles.userDetailsAndActionConatiner}>
           <View style={styles.userDetailsFieldsConatiner}>
             <View style={styles.userDetailsFiedls}>
               <Text style={styles.fieldName}>Full Name</Text>
-              <Text style={styles.field}>Hardip Solanki</Text>
+              <Text style={styles.field}>{user?.fullName}</Text>
             </View>
             <View style={styles.userDetailsFiedls}>
               <Text style={styles.fieldName}>Age</Text>
-              <Text style={styles.field}>99</Text>
+              <Text style={styles.field}>{user?.age}</Text>
             </View>
             <View style={styles.userDetailsFiedls}>
               <Text style={styles.fieldName}>Role</Text>
-              <Text style={styles.field}>Developer</Text>
+              <Text style={styles.field}>{user?.profession}</Text>
             </View>
             <View style={[styles.userDetailsFiedls, { borderBottomWidth: 0 }]}>
               <Text style={styles.fieldName}>Profile Id</Text>
-              <Text style={styles.field}>#TO878FA</Text>
+              <Text style={styles.field}>#{user?.userId}</Text>
             </View>
           </View>
-          {user.role === "ADMIN" && (
+          {(currUser?.role === "ADMIN" || currUser.userId === normalizedId) && (
             <>
-              <Button onPress={() => {}}>
+              <Button
+                style={{ backgroundColor: currUser.bgColor || COLORS.primary }}
+                onPress={() =>
+                  router.push({
+                    pathname: `/${ROUTES.EdtiProfile}`,
+                    params: { userId: normalizedId },
+                  })
+                }
+              >
                 {PLAINTEXT.singleProfile.editBtn}
               </Button>
-              <Button isDanger onPress={() => {}}>
+              <Button
+                isDanger
+                onPress={() => handleDeleteProfile(normalizedId)}
+              >
                 {PLAINTEXT.singleProfile.deleteBtn}
               </Button>
             </>
@@ -108,9 +143,9 @@ const styles = StyleSheet.create({
     color: COLORS.muted,
   },
   headerInnerConatiner: {
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
-    flexDirection: "row",
+    flexDirection: "row-reverse",
     width: "100%",
   },
   mainContainer: {
@@ -144,12 +179,17 @@ const styles = StyleSheet.create({
     padding: 17,
   },
   fieldName: {
-    fontSize: 20,
+    fontSize: 15,
     fontWeight: "bold",
     color: "#B0B0B0",
   },
   field: {
-    fontSize: 20,
+    fontSize: 15,
     fontWeight: "bold",
+  },
+  backArrow: {
+    position: "absolute",
+    top: 19,
+    left: 2,
   },
 });

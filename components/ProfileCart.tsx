@@ -5,30 +5,37 @@ import { StyleSheet, Text, View } from "react-native";
 import GenerateUserLogo from "./GenerateUserLogo";
 
 type ProfileCartProps = {
+  fullName: string;
+  age: string;
+  profession: string;
   bgColor?: string;
 };
-const ProfileCart = ({ bgColor }: ProfileCartProps) => {
+const ProfileCart = ({
+  fullName,
+  profession,
+  age,
+  bgColor,
+}: ProfileCartProps) => {
   return (
     <View style={styles.conatainer}>
       <View style={styles.logoAndUserTextCoantiner}>
         <GenerateUserLogo
           bgColor={bgColor ? bgColor : COLORS.primary}
-          firstLatter="H"
-          secondLatter="S"
+          fullName={fullName}
           layoutSize={80}
           fontSize={30}
         />
         <View style={styles.userDetailsConatiner}>
-          <Text style={styles.userName}>Hardip Solanki</Text>
+          <Text style={styles.userName}>{fullName}</Text>
           <View style={styles.dotAndProfilesCount}>
-            <Text style={styles.profileCountText}>Age 20</Text>
+            <Text style={styles.profileCountText}>{age}</Text>
             <Text style={styles.dot}>.</Text>
-            <Text style={styles.profileCountText}>Developer</Text>
+            <Text style={styles.profileCountText}>{profession}</Text>
           </View>
         </View>
       </View>
       <View>
-        <Ionicons name="arrow-forward-circle" size={28} />
+        <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
       </View>
     </View>
   );
@@ -67,7 +74,7 @@ const styles = StyleSheet.create({
   dotAndProfilesCount: {
     flexDirection: "row",
     gap: 7,
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
   },
   dot: {

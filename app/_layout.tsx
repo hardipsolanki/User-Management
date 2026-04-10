@@ -16,6 +16,10 @@ export default function RootLayout() {
             options={{ headerShown: false }}
           />
           <Stack.Screen
+            name={ROUTES.EdtiProfile}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
             name={ROUTES.SingleUset}
             options={{ headerShown: false }}
           />

@@ -1,3 +1,4 @@
+import { admin } from "@/constants/admin";
 import { User } from "@/types/user";
 import { getProfiles } from "@/utils/profile";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -13,13 +14,17 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     role: "USER",
     userId: "",
     profession: "",
+    bgColor: "",
   });
   const [profiles, setProfile] = useState<User[]>([]);
 
   useEffect(() => {
     const loadProfiles = async () => {
       const initalProfiles = await getProfiles();
-      setProfile(initalProfiles || []);
+      const availableUserProfile = initalProfiles?.filter(
+        (p) => p.email !== admin.adminEmail,
+      );
+      setProfile(availableUserProfile || []);
 
       const curUser = await AsyncStorage.getItem("currUser");
       curUser && setUser(JSON.parse(curUser));
@@ -31,8 +36,27 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     setProfile((prev) => [newProfile, ...prev]);
   };
 
+  const deleteProfile = (profileId: string) => {
+    setProfile((prev) => prev.filter((p) => p.userId !== profileId));
+  };
+
+  const updateProfile = (updatedProfile: User) => {
+    setProfile((prev) =>
+      prev.map((p) =>
+        p.userId === updatedProfile.userId ? updatedProfile : p,
+      ),
+    );
+  };
+
   const adminValue = useMemo(
-    () => ({ user, setUser, profiles, setProfile: handleSetProfile }),
+    () => ({
+      user,
+      setUser,
+      profiles,
+      setProfile: handleSetProfile,
+      deleteProfile,
+      updateProfile,
+    }),
     [user, profiles],
   );
 

@@ -53,6 +53,7 @@ const login = () => {
             profession: data.user.profession,
             role: data.user.role,
             userId: data.user.userId,
+            bgColor: data.user.bgColor,
           };
           await AsyncStorage.setItem("currUser", JSON.stringify(currentUser));
 
@@ -65,6 +66,7 @@ const login = () => {
             fullName: "",
             profession: "",
             role: data.admin.role as "ADMIN" | "USER",
+            bgColor: "",
           };
           await AsyncStorage.setItem("currUser", JSON.stringify(currentUser));
           setUser(currentUser);

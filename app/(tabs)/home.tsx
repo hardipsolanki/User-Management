@@ -6,13 +6,12 @@ import { PLAINTEXT } from "@/constants/text";
 import { UserContext } from "@/context/UserContext";
 import { Link, useRouter } from "expo-router";
 import React, { useContext } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Index = () => {
   const router = useRouter();
   const { user, profiles } = useContext(UserContext);
-  console.log("users: ", user);
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.profileHeader}>
@@ -32,13 +31,26 @@ const Index = () => {
         )}
         <Text style={styles.userText}>{PLAINTEXT.home.Users}</Text>
         <View style={styles.profilesRenderConatiner}>
-          <Link
-            href={{ pathname: `/${ROUTES.SingleUset}`, params: { userId: 1 } }}
-          >
-            <ProfileCart />
-          </Link>
-          <ProfileCart />
-          <ProfileCart />
+          <FlatList
+            data={profiles}
+            renderItem={({ item }) => (
+              <Link
+                href={{
+                  pathname: `/${ROUTES.SingleUset}`,
+                  params: { userId: item.userId },
+                }}
+              >
+                <ProfileCart
+                  fullName={item.fullName}
+                  age={item.age}
+                  profession={item.profession}
+                  bgColor={item.bgColor}
+                />
+              </Link>
+            )}
+            keyExtractor={(item) => item.userId}
+            ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+          />
         </View>
       </View>
     </SafeAreaView>

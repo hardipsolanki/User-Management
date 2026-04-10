@@ -4,10 +4,10 @@ import { PLAINTEXT } from "@/constants/text";
 import { UserContext } from "@/context/UserContext";
 import { AddUser, User } from "@/types/user";
 import { generateRandomBgColor } from "@/utils/generateRandomBgColor";
-import { addProfile } from "@/utils/profile";
+import { addProfile, updateProfile } from "@/utils/profile";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
-import React, { useContext, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -22,23 +22,24 @@ import { UnderlineInput } from "./UserLineTextInput";
 const AddProfileForm = ({ user }: { user?: User }) => {
   const router = useRouter();
   const [fieldsData, setFieldsData] = useState<AddUser>({
-    fullName: "",
-    email: "",
-    age: "",
+    fullName: user?.fullName || "",
+    email: user?.email || "",
+    age: user?.age || "",
     password: "",
     role: "USER",
-    profession: "",
-    bgColor: "",
+    profession: user?.profession || "",
+    bgColor: user?.bgColor || "",
   });
   const [error, setError] = useState("");
   const [fullNameErrMsg, setFullNameErrMsg] = useState("");
   const [emailErrMsg, setEmailErrMsg] = useState("");
   const [ageErrMsg, setAgeErrMsg] = useState("");
-  const [roleErrMsg, setRoleErrMsg] = useState("");
+  const [professionErrMsg, setProfessionErrMsg] = useState("");
   const [passwordErrMsg, setPasswordErrMsg] = useState("");
-  const [bgColor, setBgColor] = useState(COLORS.primary);
+  const [bgColor, setBgColor] = useState(user?.bgColor || COLORS.primary);
   const [loading, setLoading] = useState<boolean>(false);
-  const { setProfile } = useContext(UserContext);
+  const { setProfile, updateProfile: updateProfileState } =
+    useContext(UserContext);
   const validation = () => {
     let isValid = true;
     if (!fieldsData.fullName) {
@@ -53,11 +54,11 @@ const AddProfileForm = ({ user }: { user?: User }) => {
       isValid = false;
       setAgeErrMsg(PLAINTEXT.addProfile.ageReqErr);
     }
-    if (!fieldsData.role) {
+    if (!fieldsData.profession) {
       isValid = false;
-      setRoleErrMsg(PLAINTEXT.addProfile.roleReqErr);
+      setProfessionErrMsg(PLAINTEXT.addProfile.professioneqErr);
     }
-    if (!fieldsData.password) {
+    if (!user && !fieldsData.password) {
       isValid = false;
       setPasswordErrMsg(PLAINTEXT.addProfile.passwordReqErr);
     }
@@ -66,13 +67,30 @@ const AddProfileForm = ({ user }: { user?: User }) => {
 
   const onSubmit = async () => {
     const isValid = validation();
+    console.log(isValid);
     if (!isValid) return;
     if (user?.userId) {
-      // update logic
+      try {
+        setLoading(true);
+        const data = await updateProfile({
+          ...fieldsData,
+          bgColor: bgColor,
+          userId: user.userId,
+        });
+        if (data?.data) {
+          updateProfileState(data.data);
+          router.back();
+        }
+      } catch (error: any) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+      return;
     } else {
       try {
         setLoading(true);
-        const data = await addProfile({ ...fieldsData });
+        const data = await addProfile({ ...fieldsData, bgColor: bgColor });
         if (data.data) {
           setProfile({ ...data.data, bgColor: bgColor });
           router.push(`/${ROUTES.Tabs}/${ROUTES.Home}`);
@@ -86,6 +104,9 @@ const AddProfileForm = ({ user }: { user?: User }) => {
     }
   };
 
+  const avatarColors = useMemo(() => {
+    return [0, 1, 2, 3, 4].map(() => generateRandomBgColor());
+  }, []);
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -107,12 +128,13 @@ const AddProfileForm = ({ user }: { user?: User }) => {
               </View>
             </View>
           </View>
-          <View>
-            <Ionicons name="arrow-back" size={20} color={COLORS.muted} />
+          <View style={styles.backArrow}>
+            <TouchableOpacity onPress={() => router.back()}>
+              <Ionicons name="arrow-back" size={20} color={COLORS.muted} />
+            </TouchableOpacity>
           </View>
         </View>
       </View>
-
       <ScrollView style={styles.scrollArea}>
         <View style={styles.mainContainer}>
           <View style={styles.userDetails}>
@@ -121,30 +143,25 @@ const AddProfileForm = ({ user }: { user?: User }) => {
             )}
             <GenerateUserLogo
               bgColor={bgColor}
-              firstLatter="H"
-              secondLatter="S"
+              fullName={fieldsData.fullName}
               layoutSize={90}
               fontSize={40}
             />
             <Text style={styles.profileChangeText}>Tap to change avatar</Text>
             <View style={styles.availableAvatarConatiner}>
-              {[0, 1, 2, 3, 4].map((_, idx) => {
-                const bgColor = generateRandomBgColor();
-                return (
-                  <TouchableOpacity
-                    onPress={() => setBgColor(bgColor)}
-                    key={idx}
-                  >
-                    <GenerateUserLogo
-                      bgColor={bgColor}
-                      firstLatter="H"
-                      secondLatter="S"
-                      layoutSize={50}
-                      fontSize={9}
-                    />
-                  </TouchableOpacity>
-                );
-              })}
+              {avatarColors.map((avatarColor, idx) => (
+                <TouchableOpacity
+                  onPress={() => setBgColor(avatarColor)}
+                  key={idx}
+                >
+                  <GenerateUserLogo
+                    bgColor={avatarColor}
+                    fullName={fieldsData.fullName}
+                    layoutSize={50}
+                    fontSize={9}
+                  />
+                </TouchableOpacity>
+              ))}
             </View>
           </View>
           <View style={styles.userDetailsAndActionConatiner}>
@@ -174,20 +191,22 @@ const AddProfileForm = ({ user }: { user?: User }) => {
             />
             <UnderlineInput
               onChange={(text) => {
-                setFieldsData((prev) => ({ ...prev, Profession: text }));
+                setFieldsData((prev) => ({ ...prev, profession: text }));
               }}
               value={fieldsData.profession}
-              label="Role"
-              error={roleErrMsg}
+              label="Profession"
+              error={professionErrMsg}
             />
-            <UnderlineInput
-              onChange={(text) => {
-                setFieldsData((prev) => ({ ...prev, password: text }));
-              }}
-              value={fieldsData.password}
-              label="Password"
-              error={passwordErrMsg}
-            />
+            {!user && (
+              <UnderlineInput
+                onChange={(text) => {
+                  setFieldsData((prev) => ({ ...prev, password: text }));
+                }}
+                value={fieldsData.password}
+                label="Password"
+                error={passwordErrMsg}
+              />
+            )}
           </View>
         </View>
       </ScrollView>
@@ -200,7 +219,7 @@ const AddProfileForm = ({ user }: { user?: User }) => {
             : PLAINTEXT.EditProfile.editBtn}
         </Button>
         {user?.userId && (
-          <Button isDiscard onPress={() => {}}>
+          <Button isDiscard onPress={() => router.back()}>
             Discard
           </Button>
         )}
@@ -236,7 +255,7 @@ const styles = StyleSheet.create({
     color: COLORS.text,
   },
   headerInnerConatiner: {
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
     flexDirection: "row",
     width: "100%",
@@ -250,6 +269,11 @@ const styles = StyleSheet.create({
   },
   profileCountText: {
     color: COLORS.muted,
+  },
+  backArrow: {
+    position: "absolute",
+    top: 19,
+    left: 2,
   },
   mainContainer: {
     padding: 25,

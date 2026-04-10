@@ -7,3 +7,4 @@ export const COLORS = {
     danger: "#E53935",
     optional: "#2563EB"
 };
+

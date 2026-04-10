@@ -31,7 +31,7 @@ export const PLAINTEXT = {
         fullNameReqErr: "Full Name is required",
         emailReqErr: "Email is required",
         ageReqErr: "Age is required",
-        roleReqErr: "Role is required",
+        professioneqErr: "profession is required",
         passwordReqErr: "Password is required",
     },
     EditProfile: {
