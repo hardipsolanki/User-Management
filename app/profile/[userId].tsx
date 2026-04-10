@@ -24,9 +24,9 @@ const Profile = () => {
 
   const handleDeleteProfile = async (profileId: string) => {
     try {
+      router.replace(`/${ROUTES.Home}`);
       deleteFromState(profileId);
       await deleteProfile(profileId);
-      router.replace(`/${ROUTES.Home}`);
     } catch (error: any) {
       console.log("error while delete profile", error.message);
     }
@@ -71,6 +71,10 @@ const Profile = () => {
               <Text style={styles.field}>{user?.fullName}</Text>
             </View>
             <View style={styles.userDetailsFiedls}>
+              <Text style={styles.fieldName}>Email</Text>
+              <Text style={styles.field}>{user?.email}</Text>
+            </View>
+            <View style={styles.userDetailsFiedls}>
               <Text style={styles.fieldName}>Age</Text>
               <Text style={styles.field}>{user?.age}</Text>
             </View>
@@ -96,13 +100,12 @@ const Profile = () => {
               >
                 {PLAINTEXT.singleProfile.editBtn}
               </Button>
-              <Button
-                isDanger
-                onPress={() => handleDeleteProfile(normalizedId)}
-              >
-                {PLAINTEXT.singleProfile.deleteBtn}
-              </Button>
             </>
+          )}
+          {currUser.role === "ADMIN" && (
+            <Button isDanger onPress={() => handleDeleteProfile(normalizedId)}>
+              {PLAINTEXT.singleProfile.deleteBtn}
+            </Button>
           )}
         </View>
       </View>

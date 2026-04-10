@@ -18,7 +18,9 @@ const Index = () => {
         <Text style={styles.profileText}>{PLAINTEXT.home.profiles}</Text>
         <View style={styles.profilesDetailsConatiner}>
           <View style={styles.dotAndProfilesCount}>
-            <Text style={styles.profileCountText}>3 Profiles</Text>
+            <Text style={styles.profileCountText}>
+              {profiles?.length} {PLAINTEXT.home.profiles}
+            </Text>
             <Text style={styles.dot}>.</Text>
           </View>
         </View>
@@ -26,7 +28,7 @@ const Index = () => {
       <View style={styles.mainConatiner}>
         {user.role === "ADMIN" && (
           <Button onPress={() => router.push(`/${ROUTES.AddProfile}`)}>
-            Add New Profile
+            {PLAINTEXT.home.addProfileBtn}
           </Button>
         )}
         <Text style={styles.userText}>{PLAINTEXT.home.Users}</Text>
@@ -42,7 +44,7 @@ const Index = () => {
               >
                 <ProfileCart
                   fullName={item.fullName}
-                  age={item.age}
+                  age={item?.age}
                   profession={item.profession}
                   bgColor={item.bgColor}
                 />

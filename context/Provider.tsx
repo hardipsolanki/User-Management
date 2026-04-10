@@ -10,7 +10,7 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<Omit<User, "password">>({
     email: "",
     fullName: "",
-    age: "",
+    age: null,
     role: "USER",
     userId: "",
     profession: "",
@@ -21,13 +21,16 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   useEffect(() => {
     const loadProfiles = async () => {
       const initalProfiles = await getProfiles();
+      const curUser: any = await AsyncStorage.getItem("currUser");
+      const currentUserObject = JSON.parse(curUser);
       const availableUserProfile = initalProfiles?.filter(
-        (p) => p.email !== admin.adminEmail,
+        (p) =>
+          p.email !== admin.adminEmail &&
+          (currentUserObject.role !== "USER" ||
+            p.email !== currentUserObject.email),
       );
+      setUser(currentUserObject);
       setProfile(availableUserProfile || []);
-
-      const curUser = await AsyncStorage.getItem("currUser");
-      curUser && setUser(JSON.parse(curUser));
     };
 
     loadProfiles();

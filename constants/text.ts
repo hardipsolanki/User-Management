@@ -17,7 +17,7 @@ export const PLAINTEXT = {
     home: {
         profiles: "Profiles",
         profileDeatils: "Profile Detail",
-        Users: "USERS",
+        Users: "User",
         addProfileBtn: "Add New Prfoile"
     },
     singleProfile: {
@@ -39,5 +39,41 @@ export const PLAINTEXT = {
         text: "Edit user profile",
         editBtn: "Save Change",
         discardBtn: "Discard"
+    },
+    setting: {
+        setting: "Settingg",
+        text: "Manage your account preferences",
+        account: {
+            account: "Account",
+            editProfile: "Edit Profile",
+            changePassword: "Change Password"
+        },
+        appInfo: {
+            apInfo: "App Info",
+            pricacyPolicy: "Privacy Policy",
+            version: "Version"
+        },
+        logOut: "Logout"
+    },
+    changePassword: {
+        text: "Change Password",
+        tetxBio: "Protect your account.",
+        label: {
+            oldPass: "Old Password",
+            newPass: "New Password",
+            confirmPass: "Confirm Password",
+        },
+        placeHolder: {
+            oldPass: "Enter old password",
+            newPass: "Enter new password",
+            confirmPass: "Enter confirm password",
+        },
+        erroMsg: {
+            oldPassRequired: "Old password is required",
+            newPassRequired: "New password is required",
+            confirmPassRequired: "Confirm password is required",
+            samePassErr: "Password do not match"
+        },
+        submitBtn: "Change Password"
     }
 }

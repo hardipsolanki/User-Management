@@ -1,5 +1,6 @@
 import { Button } from "@/components/Button";
 import { InputField } from "@/components/InputFields";
+import { COLORS } from "@/constants/color";
 import { ROUTES } from "@/constants/routesName";
 import { PLAINTEXT } from "@/constants/text";
 import { UserContext } from "@/context/UserContext";
@@ -60,15 +61,16 @@ const login = () => {
           setUser(currentUser);
         } else {
           const currentUser = {
-            age: "",
+            age: 35,
             email: data.admin.adminEmail,
             userId: data.admin.adminId,
-            fullName: "",
-            profession: "",
+            fullName: "A D",
+            profession: "admin",
             role: data.admin.role as "ADMIN" | "USER",
-            bgColor: "",
+            bgColor: COLORS.primary,
           };
           await AsyncStorage.setItem("currUser", JSON.stringify(currentUser));
+
           setUser(currentUser);
         }
       }

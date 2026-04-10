@@ -22,10 +22,11 @@ const GenerateUserLogo = ({
       ]}
     >
       <Text style={[styles.firstLatter, { fontSize }]}>
-        {fullName?.charAt(0)}
+        {fullName?.charAt(0).toUpperCase()}
       </Text>
       <Text style={[styles.secondLatter, { fontSize }]}>
-        {fullName?.split(" ")?.[1]?.charAt(0)}
+        {fullName?.split(" ")?.[1]?.charAt(0).toUpperCase() ||
+          fullName.charAt(1).toUpperCase()}
       </Text>
     </View>
   );

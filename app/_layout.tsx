@@ -23,6 +23,10 @@ export default function RootLayout() {
             name={ROUTES.SingleUset}
             options={{ headerShown: false }}
           />
+          <Stack.Screen
+            name={ROUTES.ChangePassword}
+            options={{ headerShown: false }}
+          />
         </Stack>
       </AppProvider>
     </SafeAreaProvider>

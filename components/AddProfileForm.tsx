@@ -6,8 +6,8 @@ import { AddUser, User } from "@/types/user";
 import { generateRandomBgColor } from "@/utils/generateRandomBgColor";
 import { addProfile, updateProfile } from "@/utils/profile";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useRouter } from "expo-router";
-import React, { useContext, useMemo, useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -20,15 +20,28 @@ import GenerateUserLogo from "./GenerateUserLogo";
 import { UnderlineInput } from "./UserLineTextInput";
 
 const AddProfileForm = ({ user }: { user?: User }) => {
+  const { userId } = useLocalSearchParams();
   const router = useRouter();
+  const normalizedId = Array.isArray(userId) ? userId[0] : userId;
+  const {
+    user: currUser,
+    setUser,
+    setProfile,
+    updateProfile: updateProfileState,
+  } = useContext(UserContext);
   const [fieldsData, setFieldsData] = useState<AddUser>({
-    fullName: user?.fullName || "",
-    email: user?.email || "",
-    age: user?.age || "",
-    password: "",
+    fullName:
+      user?.fullName || (currUser.role !== "ADMIN" && currUser.fullName) || "",
+    email: user?.email || (currUser.role !== "ADMIN" && currUser.email) || "",
+    age: user?.age || (currUser.role !== "ADMIN" && currUser.age) || null,
+    password: user?.password || "",
     role: "USER",
-    profession: user?.profession || "",
-    bgColor: user?.bgColor || "",
+    profession:
+      user?.profession ||
+      (currUser.role !== "ADMIN" && currUser.profession) ||
+      "",
+    bgColor:
+      user?.bgColor || (currUser.role !== "ADMIN" && currUser.bgColor) || "",
   });
   const [error, setError] = useState("");
   const [fullNameErrMsg, setFullNameErrMsg] = useState("");
@@ -38,8 +51,7 @@ const AddProfileForm = ({ user }: { user?: User }) => {
   const [passwordErrMsg, setPasswordErrMsg] = useState("");
   const [bgColor, setBgColor] = useState(user?.bgColor || COLORS.primary);
   const [loading, setLoading] = useState<boolean>(false);
-  const { setProfile, updateProfile: updateProfileState } =
-    useContext(UserContext);
+
   const validation = () => {
     let isValid = true;
     if (!fieldsData.fullName) {
@@ -58,27 +70,30 @@ const AddProfileForm = ({ user }: { user?: User }) => {
       isValid = false;
       setProfessionErrMsg(PLAINTEXT.addProfile.professioneqErr);
     }
-    if (!user && !fieldsData.password) {
+    if (user?.role === "ADMIN" && !fieldsData.password) {
       isValid = false;
       setPasswordErrMsg(PLAINTEXT.addProfile.passwordReqErr);
     }
     return isValid;
   };
 
+  useEffect(() => {}, []);
+
   const onSubmit = async () => {
     const isValid = validation();
     console.log(isValid);
     if (!isValid) return;
-    if (user?.userId) {
+    if (user?.userId || normalizedId) {
       try {
         setLoading(true);
         const data = await updateProfile({
           ...fieldsData,
           bgColor: bgColor,
-          userId: user.userId,
+          userId: user?.userId || normalizedId,
         });
         if (data?.data) {
           updateProfileState(data.data);
+          currUser.role !== "ADMIN" && setUser(data.data);
           router.back();
         }
       } catch (error: any) {
@@ -183,9 +198,10 @@ const AddProfileForm = ({ user }: { user?: User }) => {
             />
             <UnderlineInput
               onChange={(text) =>
-                setFieldsData((prev) => ({ ...prev, age: text }))
+                setFieldsData((prev) => ({ ...prev, age: Number(text) }))
               }
-              value={String(fieldsData.age)}
+              keyboardType="numeric"
+              value={fieldsData.age?.toString() ?? " "}
               label="Age"
               error={ageErrMsg}
             />
@@ -197,7 +213,7 @@ const AddProfileForm = ({ user }: { user?: User }) => {
               label="Profession"
               error={professionErrMsg}
             />
-            {!user && (
+            {currUser.role === "ADMIN" && (
               <UnderlineInput
                 onChange={(text) => {
                   setFieldsData((prev) => ({ ...prev, password: text }));
@@ -213,7 +229,16 @@ const AddProfileForm = ({ user }: { user?: User }) => {
 
       {/* Action Button */}
       <View style={styles.actionBtnConatiner}>
-        <Button loading={loading} onPress={onSubmit}>
+        <Button
+          loading={loading}
+          onPress={onSubmit}
+          style={{
+            backgroundColor:
+              user?.role === "ADMIN"
+                ? COLORS.primary
+                : user?.bgColor || COLORS.primary,
+          }}
+        >
           {!user
             ? PLAINTEXT.addProfile.createProfileBtn
             : PLAINTEXT.EditProfile.editBtn}

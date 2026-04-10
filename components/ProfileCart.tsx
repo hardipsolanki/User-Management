@@ -6,7 +6,7 @@ import GenerateUserLogo from "./GenerateUserLogo";
 
 type ProfileCartProps = {
   fullName: string;
-  age: string;
+  age: number | null;
   profession: string;
   bgColor?: string;
 };
@@ -28,7 +28,7 @@ const ProfileCart = ({
         <View style={styles.userDetailsConatiner}>
           <Text style={styles.userName}>{fullName}</Text>
           <View style={styles.dotAndProfilesCount}>
-            <Text style={styles.profileCountText}>{age}</Text>
+            {age && <Text style={styles.profileCountText}>{age}</Text>}
             <Text style={styles.dot}>.</Text>
             <Text style={styles.profileCountText}>{profession}</Text>
           </View>

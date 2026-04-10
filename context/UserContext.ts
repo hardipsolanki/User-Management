@@ -14,7 +14,7 @@ export const UserContext = createContext<
             userId: "",
             fullName: "",
             email: "",
-            age: "",
+            age: null,
             role: "USER",
             profession: "",
             bgColor: ""
