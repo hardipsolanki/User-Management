@@ -1,5 +1,6 @@
+import { ThemeContext } from "@/context/ThemeContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -33,7 +34,10 @@ export const InputField = ({
   style: customStyle,
   multiline = false,
 }: InputFieldProps) => {
-  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const { COLORS } = useContext(ThemeContext);
+  const styles = createStyles(COLORS);
 
   return (
     <View style={styles.lableAndInputConatiner}>
@@ -41,66 +45,77 @@ export const InputField = ({
         {icon && icon}
         <Text style={styles.label}>{label}</Text>
       </View>
+
       <View>
         <TextInput
-          style={[styles.input, customStyle, error && { borderColor: "red" }]}
+          style={[
+            styles.input,
+            customStyle,
+            error && { borderColor: COLORS.danger },
+          ]}
           placeholder={placeHolder}
+          placeholderTextColor={COLORS.muted}
           value={value}
           secureTextEntry={isPassword && !showPassword}
           keyboardType={keyboardType}
           multiline={multiline}
           onChangeText={(text) => onChange(text)}
         />
+
         {isPassword && (
           <View style={styles.passwordHideShowContainer}>
-            {showPassword ? (
-              <TouchableOpacity onPress={() => setShowPassword(false)}>
-                <Ionicons name="eye-off" size={17} color="black" />
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity onPress={() => setShowPassword(true)}>
-                <Ionicons name="eye" size={17} color="black" />
-              </TouchableOpacity>
-            )}
+            <TouchableOpacity onPress={() => setShowPassword((prev) => !prev)}>
+              <Ionicons
+                name={showPassword ? "eye-off" : "eye"}
+                size={17}
+                color={COLORS.text}
+              />
+            </TouchableOpacity>
           </View>
         )}
-        {error && (
-          <View>
-            <Text style={styles.errorMessage}>{error}</Text>
-          </View>
-        )}
+
+        {error && <Text style={styles.errorMessage}>{error}</Text>}
       </View>
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  lableAndInputConatiner: {
-    gap: 5,
-  },
-  labelAndIconConatiner: {
-    flexDirection: "row",
-    gap: 5,
-  },
-  label: {
-    color: "rgb(12, 7, 7)",
-    fontSize: 14,
-    fontWeight: "500",
-    marginBottom: 6,
-  },
-  input: {
-    borderWidth: 1.5,
-    borderColor: "rgba(23, 10, 10, 0.18)",
-    padding: 10,
-    borderRadius: 10,
-  },
-  passwordHideShowContainer: {
-    position: "absolute",
-    right: 10,
-    top: 12,
-  },
-  errorMessage: {
-    color: "red",
-    padding: 6,
-  },
-});
+const createStyles = (COLORS: any) =>
+  StyleSheet.create({
+    lableAndInputConatiner: {
+      gap: 5,
+    },
+
+    labelAndIconConatiner: {
+      flexDirection: "row",
+      gap: 5,
+      alignItems: "center",
+    },
+
+    label: {
+      color: COLORS.text,
+      fontSize: 14,
+      fontWeight: "500",
+      marginBottom: 6,
+    },
+
+    input: {
+      borderWidth: 1.5,
+      borderColor: COLORS.muted,
+      padding: 10,
+      borderRadius: 10,
+      color: COLORS.text,
+      backgroundColor: COLORS.card,
+    },
+
+    passwordHideShowContainer: {
+      position: "absolute",
+      right: 10,
+      top: 12,
+    },
+
+    errorMessage: {
+      color: COLORS.danger,
+      paddingTop: 6,
+    },
+  });

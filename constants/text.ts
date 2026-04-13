@@ -43,7 +43,8 @@ export const PLAINTEXT = {
         edit: "Update Profile",
         text: "Edit user profile",
         editBtn: "Save Change",
-        discardBtn: "Discard"
+        discardBtn: "Discard",
+        change: "Tap to change avatar"
     },
     setting: {
         setting: "Setting",

@@ -1,6 +1,6 @@
-import { COLORS } from "@/constants/color";
 import { ROUTES } from "@/constants/routesName";
 import { PLAINTEXT } from "@/constants/text";
+import { ThemeContext } from "@/context/ThemeContext";
 import { UserContext } from "@/context/UserContext";
 import { AddUser, User } from "@/types/user";
 import { generateRandomBgColor } from "@/utils/generateRandomBgColor";
@@ -25,12 +25,17 @@ const AddProfileForm = ({ user }: { user?: User }) => {
   const { userId } = useLocalSearchParams();
   const router = useRouter();
   const normalizedId = Array.isArray(userId) ? userId[0] : userId;
+
   const {
     user: currUser,
     setUser,
     setProfile,
     updateProfile: updateProfileState,
   } = useContext(UserContext);
+
+  const { COLORS } = useContext(ThemeContext);
+  const styles = createStyles(COLORS);
+
   const [fieldsData, setFieldsData] = useState<AddUser>({
     fullName:
       user?.fullName || (currUser.role !== "ADMIN" && currUser.fullName) || "",
@@ -45,6 +50,7 @@ const AddProfileForm = ({ user }: { user?: User }) => {
     bgColor:
       user?.bgColor || (currUser.role !== "ADMIN" && currUser.bgColor) || "",
   });
+
   const [error, setError] = useState("");
   const [fullNameErrMsg, setFullNameErrMsg] = useState("");
   const [emailErrMsg, setEmailErrMsg] = useState("");
@@ -52,19 +58,17 @@ const AddProfileForm = ({ user }: { user?: User }) => {
   const [professionErrMsg, setProfessionErrMsg] = useState("");
   const [passwordErrMsg, setPasswordErrMsg] = useState("");
   const [bgColor, setBgColor] = useState(user?.bgColor || COLORS.primary);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
 
   const validation = () => {
     let isValid = true;
 
-    // Saara errors pehla clear karo
     setFullNameErrMsg("");
     setEmailErrMsg("");
     setAgeErrMsg("");
     setProfessionErrMsg("");
     setPasswordErrMsg("");
 
-    // 1. Full Name — sirf letters ane spaces, min 2 chars
     const nameRegex = /^[a-zA-Z\s]{2,}$/;
     if (!fieldsData.fullName.trim()) {
       isValid = false;
@@ -74,7 +78,6 @@ const AddProfileForm = ({ user }: { user?: User }) => {
       setFullNameErrMsg("Only letters allowed, min 2 characters");
     }
 
-    // 2. Email — standard email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!fieldsData.email.trim()) {
       isValid = false;
@@ -84,7 +87,6 @@ const AddProfileForm = ({ user }: { user?: User }) => {
       setEmailErrMsg(PLAINTEXT.addProfile.invalidEmailErr);
     }
 
-    // 3. Age — sirf number, 1-120 range
     const ageRegex = /^[0-9]+$/;
     if (!fieldsData.age) {
       isValid = false;
@@ -97,7 +99,6 @@ const AddProfileForm = ({ user }: { user?: User }) => {
       setAgeErrMsg(PLAINTEXT.addProfile.invalidAgeErr);
     }
 
-    // 4. Profession — letters, spaces, min 2 chars
     const professionRegex = /^[a-zA-Z\s]{2,}$/;
     if (!fieldsData.profession.trim()) {
       isValid = false;
@@ -107,7 +108,6 @@ const AddProfileForm = ({ user }: { user?: User }) => {
       setProfessionErrMsg(PLAINTEXT.addProfile.invalidProfessionErr);
     }
 
-    // 5. Password — min 8 chars, ek number, ek uppercase
     const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9]).{8,}$/;
     if (currUser?.role === "ADMIN" && !fieldsData.password) {
       isValid = false;
@@ -126,157 +126,182 @@ const AddProfileForm = ({ user }: { user?: User }) => {
   const onSubmit = async () => {
     const isValid = validation();
     if (!isValid) return;
-    if (user?.userId || normalizedId) {
-      try {
-        setLoading(true);
+
+    try {
+      setLoading(true);
+
+      if (user?.userId || normalizedId) {
         const data = await updateProfile({
           ...fieldsData,
-          bgColor: bgColor,
+          bgColor,
           userId: user?.userId || normalizedId,
         });
+
         updateProfileState({
           ...fieldsData,
-          bgColor: bgColor,
+          bgColor,
           userId: user?.userId || normalizedId,
         });
+
         if (data?.data) {
-          const updatedData = { ...data.data, bgColor: bgColor };
+          const updatedData = { ...data.data, bgColor };
           currUser.role !== "ADMIN" && setUser(updatedData);
           router.back();
         }
-      } catch (error: any) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-      return;
-    } else {
-      try {
-        setLoading(true);
-        const data = await addProfile({ ...fieldsData, bgColor: bgColor });
+      } else {
+        const data = await addProfile({
+          ...fieldsData,
+          bgColor,
+        });
+
         if (data.data) {
-          setProfile({ ...data.data, bgColor: bgColor });
+          setProfile({ ...data.data, bgColor });
           router.push(`/${ROUTES.Tabs}/${ROUTES.Home}`);
         }
-        setLoading(false);
-      } catch (error: any) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
       }
+    } catch (error: any) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const avatarColors = useMemo(() => {
-    return [0, 1, 2, 3, 4].map(() => generateRandomBgColor());
-  }, []);
+  const avatarColors = useMemo(
+    () => [0, 1, 2, 3, 4].map(() => generateRandomBgColor()),
+    [],
+  );
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <View style={styles.container}>
-        {/* Header */}
         <View style={styles.profileHeader}>
           <View style={styles.headerInnerConatiner}>
-            <View>
-              <Text style={styles.profileText}>
-                {user?.userId
-                  ? PLAINTEXT.EditProfile.edit
-                  : PLAINTEXT.addProfile.add}
-              </Text>
-              <View style={styles.profilesDetailsConatiner}>
-                <View style={styles.dotAndProfilesCount}>
+            <View style={styles.backArrowAndProfileText}>
+              <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => router.back()}
+              >
+                <Ionicons name="arrow-back" size={20} color={COLORS.text} />
+              </TouchableOpacity>
+
+              <View>
+                <Text style={styles.profileText}>
+                  {PLAINTEXT.EditProfile.edit}
+                </Text>
+
+                <View style={styles.profilesDetailsConatiner}>
                   <Text style={styles.profileCountText}>
-                    {user?.userId
-                      ? PLAINTEXT.EditProfile.text
-                      : PLAINTEXT.addProfile.add}
+                    {PLAINTEXT.EditProfile.text}
                   </Text>
                 </View>
               </View>
             </View>
-            <View style={styles.backArrow}>
-              <TouchableOpacity onPress={() => router.back()}>
-                <Ionicons name="arrow-back" size={20} color={COLORS.muted} />
-              </TouchableOpacity>
-            </View>
           </View>
         </View>
-        <ScrollView
-          contentContainerStyle={{ paddingBottom: 20 }} // ← important
-          keyboardShouldPersistTaps="handled" // ← tap karta keyboard band na thay
-          style={styles.scrollArea}
-        >
+
+        <ScrollView style={styles.scrollArea}>
           <View style={styles.mainContainer}>
             <View style={styles.userDetails}>
-              {error && (
-                <Text style={{ color: "red", marginVertical: 8 }}>{error}</Text>
-              )}
+              {error ? <Text style={styles.errorText}>{error}</Text> : null}
+
               <GenerateUserLogo
                 bgColor={bgColor}
                 fullName={fieldsData.fullName}
                 layoutSize={90}
                 fontSize={40}
               />
-              <Text style={styles.profileChangeText}>Tap to change avatar</Text>
+
+              <Text style={styles.profileChangeText}>
+                {PLAINTEXT.EditProfile.change}
+              </Text>
+
               <View style={styles.availableAvatarConatiner}>
-                {avatarColors.map((avatarColor, idx) => (
-                  <TouchableOpacity
-                    onPress={() => setBgColor(avatarColor)}
-                    key={idx}
-                  >
-                    <GenerateUserLogo
-                      bgColor={avatarColor}
-                      fullName={fieldsData.fullName}
-                      layoutSize={50}
-                      fontSize={9}
-                    />
-                  </TouchableOpacity>
-                ))}
+                <ScrollView
+                  horizontal={true}
+                  directionalLockEnabled={true}
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.content}
+                >
+                  {avatarColors.map((color, idx) => (
+                    <TouchableOpacity
+                      key={idx}
+                      onPress={() => setBgColor(color)}
+                    >
+                      <GenerateUserLogo
+                        bgColor={color}
+                        fullName={fieldsData.fullName}
+                        layoutSize={50}
+                        fontSize={9}
+                      />
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
               </View>
             </View>
+
             <View style={styles.userDetailsAndActionConatiner}>
               <UnderlineInput
-                onChange={(text) => {
-                  setFieldsData((prev) => ({ ...prev, fullName: text }));
-                }}
-                value={fieldsData.fullName}
+                color={user?.bgColor || COLORS.primary}
                 label="Full Name"
+                value={fieldsData.fullName}
+                onChange={(text) =>
+                  setFieldsData((p) => ({ ...p, fullName: text }))
+                }
                 error={fullNameErrMsg}
               />
+
               <UnderlineInput
-                onChange={(text) =>
-                  setFieldsData((prev) => ({ ...prev, email: text }))
-                }
-                value={fieldsData.email}
+                color={user?.bgColor || COLORS.primary}
                 label="Email"
+                value={fieldsData.email}
+                onChange={(text) =>
+                  setFieldsData((p) => ({ ...p, email: text }))
+                }
                 error={emailErrMsg}
               />
+
               <UnderlineInput
-                onChange={(text) =>
-                  setFieldsData((prev) => ({ ...prev, age: Number(text) }))
-                }
-                keyboardType="numeric"
-                value={fieldsData.age?.toString() ?? " "}
+                color={user?.bgColor || COLORS.primary}
                 label="Age"
+                keyboardType="numeric"
+                value={fieldsData.age?.toString() ?? ""}
+                onChange={(text) =>
+                  setFieldsData((p) => ({
+                    ...p,
+                    age: Number(text),
+                  }))
+                }
                 error={ageErrMsg}
               />
+
               <UnderlineInput
-                onChange={(text) => {
-                  setFieldsData((prev) => ({ ...prev, profession: text }));
-                }}
-                value={fieldsData.profession}
+                color={user?.bgColor || COLORS.primary}
                 label="Profession"
+                value={fieldsData.profession}
+                onChange={(text) =>
+                  setFieldsData((p) => ({
+                    ...p,
+                    profession: text,
+                  }))
+                }
                 error={professionErrMsg}
               />
+
               {currUser.role === "ADMIN" && (
                 <UnderlineInput
+                  color={user?.bgColor || COLORS.primary}
                   isPassword
-                  onChange={(text) => {
-                    setFieldsData((prev) => ({ ...prev, password: text }));
-                  }}
-                  value={fieldsData.password}
                   label="Password"
+                  value={fieldsData.password}
+                  onChange={(text) =>
+                    setFieldsData((p) => ({
+                      ...p,
+                      password: text,
+                    }))
+                  }
                   error={passwordErrMsg}
                 />
               )}
@@ -284,20 +309,23 @@ const AddProfileForm = ({ user }: { user?: User }) => {
           </View>
         </ScrollView>
 
-        {/* Action Button */}
+        {/* Actions */}
         <View style={styles.actionBtnConatiner}>
           <Button
             loading={loading}
             onPress={onSubmit}
             style={{
               backgroundColor:
-                currUser?.role === "ADMIN" ? COLORS.primary : user?.bgColor,
+                currUser.role === "ADMIN"
+                  ? COLORS.primary
+                  : user?.bgColor || COLORS.primary,
             }}
           >
             {!user
               ? PLAINTEXT.addProfile.createProfileBtn
               : PLAINTEXT.EditProfile.editBtn}
           </Button>
+
           {user?.userId && (
             <Button isDiscard onPress={() => router.back()}>
               Discard
@@ -311,99 +339,97 @@ const AddProfileForm = ({ user }: { user?: User }) => {
 
 export default AddProfileForm;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  scrollArea: {
-    marginTop: 19,
-  },
-  profileHeader: {
-    backgroundColor: COLORS.card,
-    padding: 14,
-    paddingHorizontal: 30,
-  },
-  profileText: {
-    fontSize: 29,
-    fontWeight: "bold",
-  },
-  profileChangeText: {
-    color: COLORS.muted,
-  },
-  profilesDetailsConatiner: {
-    flexDirection: "row",
-    gap: 8,
-    color: COLORS.text,
-  },
-  headerInnerConatiner: {
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
-    width: "100%",
-  },
-  dotAndProfilesCount: {
-    height: "100%",
-    flexDirection: "row",
-    gap: 7,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  profileCountText: {
-    color: COLORS.muted,
-  },
-  backArrow: {
-    position: "absolute",
-    top: 19,
-    left: 2,
-  },
-  mainContainer: {
-    padding: 25,
-    marginTop: 20,
-    gap: 17,
-  },
-  userDetails: {
-    backgroundColor: COLORS.card,
-    padding: 20,
-    borderRadius: 20,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 10,
-  },
-  userDetailsAndActionConatiner: {
-    gap: 10,
-  },
-  userDetailsFieldsConatiner: {
-    backgroundColor: COLORS.card,
-    borderRadius: 20,
-    justifyContent: "center",
-    paddingVertical: 8,
-  },
-  userDetailsFiedls: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
-    alignItems: "center",
-    padding: 17,
-  },
-  fieldName: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#B0B0B0",
-  },
-  field: {
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-  availableAvatarConatiner: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexWrap: "wrap",
-  },
-  actionBtnConatiner: {
-    padding: 25,
-    gap: 10,
-  },
-});
+const createStyles = (COLORS: any) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: COLORS.background,
+    },
+
+    profileTextContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    profileChangeText: {
+      color: COLORS.muted,
+    },
+
+    scrollArea: {
+      marginTop: 10,
+    },
+
+    mainContainer: {
+      padding: 25,
+      gap: 17,
+    },
+
+    userDetails: {
+      backgroundColor: COLORS.card,
+      padding: 20,
+      borderRadius: 20,
+      alignItems: "center",
+      gap: 10,
+    },
+
+    userDetailsAndActionConatiner: {
+      gap: 10,
+    },
+
+    availableAvatarConatiner: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 10,
+      justifyContent: "center",
+    },
+
+    actionBtnConatiner: {
+      padding: 25,
+      gap: 10,
+      backgroundColor: COLORS.background,
+    },
+
+    errorText: {
+      color: COLORS.danger,
+    },
+
+    profileHeader: {
+      backgroundColor: COLORS.card,
+      padding: 14,
+      paddingHorizontal: 30,
+    },
+
+    profileText: {
+      fontSize: 22,
+      fontWeight: "bold",
+      color: COLORS.text,
+    },
+
+    profilesDetailsConatiner: {
+      marginTop: 2,
+    },
+
+    profileCountText: {
+      color: COLORS.muted,
+    },
+
+    backArrowAndProfileText: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 16,
+    },
+
+    backButton: {
+      width: 38,
+      height: 38,
+      borderRadius: 19,
+      backgroundColor: COLORS.background,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+
+    headerInnerConatiner: {
+      justifyContent: "center",
+    },
+    content: { paddingHorizontal: 20, gap: 10 },
+  });

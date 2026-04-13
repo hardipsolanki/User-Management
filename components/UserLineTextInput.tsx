@@ -1,6 +1,6 @@
-import { COLORS } from "@/constants/color";
+import { ThemeContext } from "@/context/ThemeContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -18,7 +18,8 @@ type UnderlineInputProps = {
   editable?: boolean;
   style?: any;
   error?: string;
-  isPassword?: boolean; // ← new prop add karyu
+  isPassword?: boolean;
+  color: string;
 };
 
 export const UnderlineInput = ({
@@ -31,14 +32,17 @@ export const UnderlineInput = ({
   style: customStyle,
   error,
   isPassword = false,
+  color,
 }: UnderlineInputProps) => {
   const [showPassword, setShowPassword] = useState(false);
 
+  const { COLORS } = useContext(ThemeContext);
+  const styles = createStyles(COLORS);
+
   return (
     <View style={[styles.container, customStyle]}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, { color: color }]}>{label}</Text>
 
-      {/* Input + Eye icon ek row ma */}
       <View style={styles.inputRow}>
         <TextInput
           style={styles.input}
@@ -47,11 +51,10 @@ export const UnderlineInput = ({
           editable={editable}
           keyboardType={keyboardType}
           onChangeText={onChange}
-          placeholderTextColor="#9E9E9E"
-          secureTextEntry={isPassword && !showPassword} // ← password hide/show
+          placeholderTextColor={COLORS.muted}
+          secureTextEntry={isPassword && !showPassword}
         />
 
-        {/* Eye icon — sirf isPassword=true hoy tyare */}
         {isPassword && (
           <TouchableOpacity
             onPress={() => setShowPassword((prev) => !prev)}
@@ -66,51 +69,54 @@ export const UnderlineInput = ({
         )}
       </View>
 
-      <View style={styles.border} />
+      <View style={[styles.border, { borderColor: color }]} />
 
-      {error && (
-        <View>
-          <Text style={styles.errorMessage}>{error}</Text>
-        </View>
-      )}
+      {error && <Text style={styles.errorMessage}>{error}</Text>}
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    paddingVertical: 10,
-    backgroundColor: COLORS.card,
-    borderRadius: 10,
-    padding: 17,
-  },
-  label: {
-    color: COLORS.primary,
-    fontSize: 13,
-    fontWeight: "600",
-    marginBottom: 4,
-    textTransform: "uppercase",
-  },
-  inputRow: {
-    flexDirection: "row", // ← input ane icon side by side
-    alignItems: "center",
-  },
-  input: {
-    flex: 1, // ← baaki space input le
-    fontSize: 16,
-    color: "#333",
-    paddingVertical: 4,
-  },
-  eyeIcon: {
-    paddingLeft: 8, // ← icon thi thodu space
-  },
-  border: {
-    borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
-    marginTop: 6,
-  },
-  errorMessage: {
-    color: "red",
-    padding: 6,
-  },
-});
+const createStyles = (COLORS: any) =>
+  StyleSheet.create({
+    container: {
+      paddingVertical: 10,
+      backgroundColor: COLORS.card,
+      borderRadius: 10,
+      padding: 17,
+    },
+
+    label: {
+      color: COLORS.primary,
+      fontSize: 13,
+      fontWeight: "600",
+      marginBottom: 4,
+      textTransform: "uppercase",
+    },
+
+    inputRow: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+
+    input: {
+      flex: 1,
+      fontSize: 16,
+      color: COLORS.text,
+      paddingVertical: 4,
+    },
+
+    eyeIcon: {
+      paddingLeft: 8,
+    },
+
+    border: {
+      borderBottomWidth: 1,
+      borderBottomColor: COLORS.muted,
+      marginTop: 6,
+    },
+
+    errorMessage: {
+      color: COLORS.danger,
+      paddingTop: 6,
+    },
+  });

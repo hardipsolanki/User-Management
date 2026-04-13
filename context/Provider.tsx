@@ -1,8 +1,11 @@
 import { admin } from "@/constants/admin";
+import { DARK_COLORS, LIGHT_COLORS } from "@/constants/color";
+import { Color } from "@/types/color";
 import { User } from "@/types/user";
 import { getProfiles } from "@/utils/profile";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useMemo, useState } from "react";
+import { ThemeContext } from "./ThemeContext";
 import { UserContext } from "./UserContext";
 
 const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -17,6 +20,7 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     bgColor: "",
   });
   const [profiles, setProfile] = useState<User[]>([]);
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
   useEffect(() => {
     const loadProfiles = async () => {
@@ -28,6 +32,11 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       );
       setUser(currentUserObject);
       setProfile(availableUserProfile || []);
+
+      const isDarkMode = await AsyncStorage.getItem("isDarkMode");
+      if (isDarkMode) {
+        setTheme(isDarkMode === "true" ? "dark" : "light");
+      }
     };
 
     loadProfiles();
@@ -51,13 +60,15 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     }
   };
 
-  // const updateProfile = (updatedProfile: User) => {
-  //   setProfile((prev) =>
-  //     prev.map((p) =>
-  //       p.userId === updatedProfile.userId ? updatedProfile : p,
-  //     ),
-  //   );
-  // };
+  const toggleTheme = async () => {
+    await AsyncStorage.setItem(
+      "isDarkMode",
+      theme === "light" ? "true" : "false",
+    );
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  };
+
+  const COLORS: Color = theme === "dark" ? DARK_COLORS : LIGHT_COLORS;
 
   const adminValue = useMemo(
     () => ({
@@ -70,9 +81,19 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     }),
     [user, profiles],
   );
+  const themeValue = useMemo(
+    () => ({
+      theme,
+      toggleTheme,
+      COLORS,
+    }),
+    [theme, COLORS],
+  );
 
   return (
-    <UserContext.Provider value={adminValue}>{children}</UserContext.Provider>
+    <ThemeContext.Provider value={themeValue}>
+      <UserContext.Provider value={adminValue}>{children}</UserContext.Provider>
+    </ThemeContext.Provider>
   );
 };
 
