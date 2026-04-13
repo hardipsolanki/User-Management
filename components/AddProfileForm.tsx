@@ -7,7 +7,7 @@ import { generateRandomBgColor } from "@/utils/generateRandomBgColor";
 import { addProfile, updateProfile } from "@/utils/profile";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useMemo, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -56,34 +56,75 @@ const AddProfileForm = ({ user }: { user?: User }) => {
 
   const validation = () => {
     let isValid = true;
-    if (!fieldsData.fullName) {
+
+    // Saara errors pehla clear karo
+    setFullNameErrMsg("");
+    setEmailErrMsg("");
+    setAgeErrMsg("");
+    setProfessionErrMsg("");
+    setPasswordErrMsg("");
+
+    // 1. Full Name — sirf letters ane spaces, min 2 chars
+    const nameRegex = /^[a-zA-Z\s]{2,}$/;
+    if (!fieldsData.fullName.trim()) {
       isValid = false;
       setFullNameErrMsg(PLAINTEXT.addProfile.fullNameReqErr);
+    } else if (!nameRegex.test(fieldsData.fullName)) {
+      isValid = false;
+      setFullNameErrMsg("Only letters allowed, min 2 characters");
     }
-    if (!fieldsData.email) {
+
+    // 2. Email — standard email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!fieldsData.email.trim()) {
       isValid = false;
       setEmailErrMsg(PLAINTEXT.addProfile.emailReqErr);
+    } else if (!emailRegex.test(fieldsData.email)) {
+      isValid = false;
+      setEmailErrMsg(PLAINTEXT.addProfile.invalidEmailErr);
     }
+
+    // 3. Age — sirf number, 1-120 range
+    const ageRegex = /^[0-9]+$/;
     if (!fieldsData.age) {
       isValid = false;
       setAgeErrMsg(PLAINTEXT.addProfile.ageReqErr);
+    } else if (!ageRegex.test(String(fieldsData.age))) {
+      isValid = false;
+      setAgeErrMsg(PLAINTEXT.addProfile.ageMustNumberErr);
+    } else if (Number(fieldsData.age) < 1 || Number(fieldsData.age) > 100) {
+      isValid = false;
+      setAgeErrMsg(PLAINTEXT.addProfile.invalidAgeErr);
     }
-    if (!fieldsData.profession) {
+
+    // 4. Profession — letters, spaces, min 2 chars
+    const professionRegex = /^[a-zA-Z\s]{2,}$/;
+    if (!fieldsData.profession.trim()) {
       isValid = false;
       setProfessionErrMsg(PLAINTEXT.addProfile.professioneqErr);
+    } else if (!professionRegex.test(fieldsData.profession)) {
+      isValid = false;
+      setProfessionErrMsg(PLAINTEXT.addProfile.invalidProfessionErr);
     }
-    if (user?.role === "ADMIN" && !fieldsData.password) {
+
+    // 5. Password — min 8 chars, ek number, ek uppercase
+    const passwordRegex = /^(?=.*[A-Z])(?=.*[0-9]).{8,}$/;
+    if (currUser?.role === "ADMIN" && !fieldsData.password) {
       isValid = false;
       setPasswordErrMsg(PLAINTEXT.addProfile.passwordReqErr);
+    } else if (
+      currUser?.role === "ADMIN" &&
+      !passwordRegex.test(fieldsData.password)
+    ) {
+      isValid = false;
+      setPasswordErrMsg(PLAINTEXT.addProfile.invalidPasswordErr);
     }
+
     return isValid;
   };
 
-  useEffect(() => {}, []);
-
   const onSubmit = async () => {
     const isValid = validation();
-    console.log(isValid);
     if (!isValid) return;
     if (user?.userId || normalizedId) {
       try {
@@ -93,9 +134,14 @@ const AddProfileForm = ({ user }: { user?: User }) => {
           bgColor: bgColor,
           userId: user?.userId || normalizedId,
         });
+        updateProfileState({
+          ...fieldsData,
+          bgColor: bgColor,
+          userId: user?.userId || normalizedId,
+        });
         if (data?.data) {
-          updateProfileState(data.data);
-          currUser.role !== "ADMIN" && setUser(data.data);
+          const updatedData = { ...data.data, bgColor: bgColor };
+          currUser.role !== "ADMIN" && setUser(updatedData);
           router.back();
         }
       } catch (error: any) {
@@ -225,6 +271,7 @@ const AddProfileForm = ({ user }: { user?: User }) => {
               />
               {currUser.role === "ADMIN" && (
                 <UnderlineInput
+                  isPassword
                   onChange={(text) => {
                     setFieldsData((prev) => ({ ...prev, password: text }));
                   }}
@@ -244,9 +291,7 @@ const AddProfileForm = ({ user }: { user?: User }) => {
             onPress={onSubmit}
             style={{
               backgroundColor:
-                user?.role === "ADMIN"
-                  ? COLORS.primary
-                  : user?.bgColor || COLORS.primary,
+                currUser?.role === "ADMIN" ? COLORS.primary : user?.bgColor,
             }}
           >
             {!user

@@ -14,11 +14,14 @@ const GenerateUserLogo = ({
   fontSize,
   layoutSize = 50,
 }: GenerateUserLogo) => {
+  // add bg color to use Memo
+  const bgColorMemo = React.useMemo(() => bgColor, [bgColor]);
+
   return (
     <View
       style={[
         styles.conatiner,
-        { width: layoutSize, height: layoutSize, backgroundColor: bgColor },
+        { width: layoutSize, height: layoutSize, backgroundColor: bgColorMemo },
       ]}
     >
       <Text style={[styles.firstLatter, { fontSize }]}>

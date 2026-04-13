@@ -6,6 +6,7 @@ import { PLAINTEXT } from "@/constants/text";
 import { UserContext } from "@/context/UserContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
 import { Link, useRouter } from "expo-router";
 import React, { useContext } from "react";
 import { StyleSheet, Text, View } from "react-native";
@@ -13,7 +14,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const setting = () => {
   const router = useRouter();
-  const { user, setProfile, setUser } = useContext(UserContext);
+  const { user } = useContext(UserContext);
+  const appVersion = Constants.expoConfig?.version;
 
   const logoutHandler = async () => {
     try {
@@ -97,7 +99,7 @@ const setting = () => {
               <Ionicons name="information-circle" size={24} color="black" />
               <Text>{PLAINTEXT.setting.appInfo.version}</Text>
             </View>
-            <Text style={styles.settingBioText}>1.0.0</Text>
+            <Text style={styles.settingBioText}>{appVersion}</Text>
           </View>
           <View
             style={[styles.innerIconAndTextContainer, { borderBottomWidth: 0 }]}

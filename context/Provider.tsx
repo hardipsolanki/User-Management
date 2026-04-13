@@ -41,12 +41,23 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   };
 
   const updateProfile = (updatedProfile: User) => {
-    setProfile((prev) =>
-      prev.map((p) =>
-        p.userId === updatedProfile.userId ? updatedProfile : p,
-      ),
+    const profileIndex = profiles.findIndex(
+      (p) => p.userId === updatedProfile.userId,
     );
+    if (profileIndex !== -1) {
+      const updatedProfiles = [...profiles];
+      updatedProfiles[profileIndex] = updatedProfile;
+      setProfile(updatedProfiles);
+    }
   };
+
+  // const updateProfile = (updatedProfile: User) => {
+  //   setProfile((prev) =>
+  //     prev.map((p) =>
+  //       p.userId === updatedProfile.userId ? updatedProfile : p,
+  //     ),
+  //   );
+  // };
 
   const adminValue = useMemo(
     () => ({

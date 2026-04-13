@@ -30,9 +30,14 @@ export const PLAINTEXT = {
         create: "Create new profile",
         fullNameReqErr: "Full Name is required",
         emailReqErr: "Email is required",
+        invalidEmailErr: "Invalid email format (e.g. user@email.com)",
         ageReqErr: "Age is required",
+        ageMustNumberErr: "Age must be a number",
+        invalidAgeErr: "Age must be between 1 and 100",
         professioneqErr: "profession is required",
+        invalidProfessionErr: "Only letters allowed, min 2 characters",
         passwordReqErr: "Password is required",
+        invalidPasswordErr: "Min 8 chars, 1 uppercase, 1 number required"
     },
     EditProfile: {
         edit: "Update Profile",
@@ -41,7 +46,7 @@ export const PLAINTEXT = {
         discardBtn: "Discard"
     },
     setting: {
-        setting: "Settingg",
+        setting: "Setting",
         text: "Manage your account preferences",
         account: {
             account: "Account",

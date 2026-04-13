@@ -5,10 +5,16 @@ import { ROUTES } from "@/constants/routesName";
 import { PLAINTEXT } from "@/constants/text";
 import { UserContext } from "@/context/UserContext";
 import { deleteProfile } from "@/utils/profile";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useContext } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Profile = () => {
@@ -35,79 +41,91 @@ const Profile = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.profileHeader}>
         <View style={styles.headerInnerConatiner}>
-          <View>
-            <Text style={styles.profileText}>
-              {PLAINTEXT.home.profileDeatils}
-            </Text>
-            <View style={styles.profilesDetailsConatiner}>
-              <View style={styles.dotAndProfilesCount}>
-                <Text style={styles.profileCountText}>{user?.fullName}</Text>
+          <View style={styles.backArrowAndProfileText}>
+            <View>
+              <TouchableOpacity
+                style={styles.backButton}
+                onPress={() => router.back()}
+              >
+                <Ionicons name="arrow-back" size={20} color={COLORS.muted} />
+              </TouchableOpacity>
+            </View>
+            <View>
+              <Text style={styles.profileText}>
+                {PLAINTEXT.home.profileDeatils}
+              </Text>
+
+              <View style={styles.profilesDetailsConatiner}>
+                <View style={styles.dotAndProfilesCount}>
+                  <Text style={styles.profileCountText}>{user?.fullName}</Text>
+                </View>
               </View>
             </View>
           </View>
-          <View style={styles.backArrow}>
-            <TouchableOpacity
-              onPress={() => router.push(`/${ROUTES.Tabs}/${ROUTES.Home}`)}
-            >
-              <Ionicons name="arrow-back" size={20} color={COLORS.muted} />
-            </TouchableOpacity>
-          </View>
         </View>
       </View>
-      <View style={styles.mainContainer}>
-        <View style={styles.userDetails}>
-          <GenerateUserLogo
-            bgColor={user?.bgColor || COLORS.primary}
-            fullName={user?.fullName || ""}
-            layoutSize={110}
-            fontSize={40}
-          />
-          <Text style={styles.profileText}>{user?.fullName}</Text>
-        </View>
-        <View style={styles.userDetailsAndActionConatiner}>
-          <View style={styles.userDetailsFieldsConatiner}>
-            <View style={styles.userDetailsFiedls}>
-              <Text style={styles.fieldName}>Full Name</Text>
-              <Text style={styles.field}>{user?.fullName}</Text>
-            </View>
-            <View style={styles.userDetailsFiedls}>
-              <Text style={styles.fieldName}>Email</Text>
-              <Text style={styles.field}>{user?.email}</Text>
-            </View>
-            <View style={styles.userDetailsFiedls}>
-              <Text style={styles.fieldName}>Age</Text>
-              <Text style={styles.field}>{user?.age}</Text>
-            </View>
-            <View style={styles.userDetailsFiedls}>
-              <Text style={styles.fieldName}>Role</Text>
-              <Text style={styles.field}>{user?.profession}</Text>
-            </View>
-            <View style={[styles.userDetailsFiedls, { borderBottomWidth: 0 }]}>
-              <Text style={styles.fieldName}>Profile Id</Text>
-              <Text style={styles.field}>#{user?.userId}</Text>
+      <ScrollView style={styles.mainConatiner}>
+        <View style={styles.mainContainer}>
+          <View style={styles.userDetails}>
+            <GenerateUserLogo
+              bgColor={user?.bgColor || COLORS.primary}
+              fullName={user?.fullName || ""}
+              layoutSize={110}
+              fontSize={40}
+            />
+            <Text style={styles.profileText}>{user?.fullName}</Text>
+          </View>
+          <View style={styles.userDetailsAndActionConatiner}>
+            <View style={styles.userDetailsFieldsConatiner}>
+              <View style={styles.userDetailsFiedls}>
+                <Text style={styles.fieldName}>Full Name</Text>
+                <Text style={styles.field}>{user?.fullName}</Text>
+              </View>
+              <View style={styles.userDetailsFiedls}>
+                <Text style={styles.fieldName}>Email</Text>
+                <Text style={styles.field}>{user?.email}</Text>
+              </View>
+              <View style={styles.userDetailsFiedls}>
+                <Text style={styles.fieldName}>Age</Text>
+                <Text style={styles.field}>{user?.age}</Text>
+              </View>
+              <View style={styles.userDetailsFiedls}>
+                <Text style={styles.fieldName}>Role</Text>
+                <Text style={styles.field}>{user?.profession}</Text>
+              </View>
+              <View
+                style={[styles.userDetailsFiedls, { borderBottomWidth: 0 }]}
+              >
+                <Text style={styles.fieldName}>Profile Id</Text>
+                <Text style={styles.field}>#{user?.userId}</Text>
+              </View>
             </View>
           </View>
-          {(currUser?.role === "ADMIN" || currUser.userId === normalizedId) && (
-            <>
-              <Button
-                style={{ backgroundColor: currUser.bgColor || COLORS.primary }}
-                onPress={() =>
-                  router.push({
-                    pathname: `/${ROUTES.EdtiProfile}`,
-                    params: { userId: normalizedId },
-                  })
-                }
-              >
-                {PLAINTEXT.singleProfile.editBtn}
-              </Button>
-            </>
-          )}
-          {currUser.role === "ADMIN" && (
-            <Button isDanger onPress={() => handleDeleteProfile(normalizedId)}>
-              {PLAINTEXT.singleProfile.deleteBtn}
-            </Button>
-          )}
         </View>
+      </ScrollView>
+      <View style={styles.actionContainer}>
+        {(currUser?.role === "ADMIN" || currUser.userId === normalizedId) && (
+          <>
+            <Button
+              style={{
+                backgroundColor: currUser.bgColor || COLORS.primary,
+              }}
+              onPress={() =>
+                router.push({
+                  pathname: `/${ROUTES.EdtiProfile}`,
+                  params: { userId: normalizedId },
+                })
+              }
+            >
+              {PLAINTEXT.singleProfile.editBtn}
+            </Button>
+          </>
+        )}
+        {currUser.role === "ADMIN" && (
+          <Button isDanger onPress={() => handleDeleteProfile(normalizedId)}>
+            {PLAINTEXT.singleProfile.deleteBtn}
+          </Button>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -119,7 +137,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    // paddingBottom: 20,
+    paddingBottom: 20,
   },
   profileHeader: {
     backgroundColor: COLORS.card,
@@ -135,6 +153,19 @@ const styles = StyleSheet.create({
     gap: 8,
     color: COLORS.text,
   },
+  backArrowAndProfileText: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 22,
+  },
+  backButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: COLORS.background,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   dotAndProfilesCount: {
     height: "100%",
     flexDirection: "row",
@@ -147,14 +178,15 @@ const styles = StyleSheet.create({
   },
   headerInnerConatiner: {
     justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row-reverse",
     width: "100%",
   },
   mainContainer: {
     padding: 25,
     marginTop: 20,
     gap: 17,
+  },
+  mainConatiner: {
+    flex: 1,
   },
   userDetails: {
     backgroundColor: COLORS.card,
@@ -190,9 +222,9 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "bold",
   },
-  backArrow: {
-    position: "absolute",
-    top: 19,
-    left: 2,
+  actionContainer: {
+    paddingHorizontal: 25,
+    paddingVertical: 20,
+    gap: 10,
   },
 });

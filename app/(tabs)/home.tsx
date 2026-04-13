@@ -5,22 +5,12 @@ import { ROUTES } from "@/constants/routesName";
 import { PLAINTEXT } from "@/constants/text";
 import { UserContext } from "@/context/UserContext";
 import { Link, useRouter } from "expo-router";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Index = () => {
-  const { user, profiles, setProfile, setUser } = useContext(UserContext);
-
-  useEffect(() => {
-    if (profiles && profiles?.length > 0) {
-      setInitlizedProfiles(profiles?.filter((p) => p.email !== user?.email));
-    }
-  }, [profiles?.length]);
-
-  const [initlizedProfiles, setInitlizedProfiles] = useState(
-    profiles?.filter ? profiles?.filter((p) => p.email !== user?.email) : [],
-  );
+  const { user, profiles } = useContext(UserContext);
   const router = useRouter();
 
   return (
@@ -45,7 +35,7 @@ const Index = () => {
         <Text style={styles.userText}>{PLAINTEXT.home.Users}</Text>
         <View style={styles.profilesRenderConatiner}>
           <FlatList
-            data={initlizedProfiles}
+            data={profiles.filter((p) => p.email !== user?.email) || []}
             renderItem={({ item }) => (
               <Link
                 href={{
@@ -62,6 +52,7 @@ const Index = () => {
               </Link>
             )}
             keyExtractor={(item) => item.userId}
+            showsVerticalScrollIndicator={false}
             ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
           />
         </View>
@@ -76,8 +67,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.background,
-    // paddingBottom: 20,
   },
+  // scrollView: {
+  //   paddingBottom: 20,
+  // },
   profileHeader: {
     backgroundColor: COLORS.card,
     padding: 14,
@@ -108,11 +101,13 @@ const styles = StyleSheet.create({
     color: COLORS.muted,
   },
   mainConatiner: {
+    flex: 1, // ← aa add karo — missing hatu
     padding: 25,
+    paddingBottom: 0,
   },
   profilesRenderConatiner: {
+    flex: 1, // ← aa add karo — missing hatu
     marginTop: 20,
-    gap: 20,
   },
   userText: {
     color: COLORS.muted,
