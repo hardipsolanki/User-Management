@@ -9,6 +9,8 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
+  KeyboardAvoidingView,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -123,133 +125,142 @@ const AddProfileForm = ({ user }: { user?: User }) => {
     return [0, 1, 2, 3, 4].map(() => generateRandomBgColor());
   }, []);
   return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.profileHeader}>
-        <View style={styles.headerInnerConatiner}>
-          <View>
-            <Text style={styles.profileText}>
-              {user?.userId
-                ? PLAINTEXT.EditProfile.edit
-                : PLAINTEXT.addProfile.add}
-            </Text>
-            <View style={styles.profilesDetailsConatiner}>
-              <View style={styles.dotAndProfilesCount}>
-                <Text style={styles.profileCountText}>
-                  {user?.userId
-                    ? PLAINTEXT.EditProfile.text
-                    : PLAINTEXT.addProfile.add}
-                </Text>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.profileHeader}>
+          <View style={styles.headerInnerConatiner}>
+            <View>
+              <Text style={styles.profileText}>
+                {user?.userId
+                  ? PLAINTEXT.EditProfile.edit
+                  : PLAINTEXT.addProfile.add}
+              </Text>
+              <View style={styles.profilesDetailsConatiner}>
+                <View style={styles.dotAndProfilesCount}>
+                  <Text style={styles.profileCountText}>
+                    {user?.userId
+                      ? PLAINTEXT.EditProfile.text
+                      : PLAINTEXT.addProfile.add}
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
-          <View style={styles.backArrow}>
-            <TouchableOpacity onPress={() => router.back()}>
-              <Ionicons name="arrow-back" size={20} color={COLORS.muted} />
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-      <ScrollView style={styles.scrollArea}>
-        <View style={styles.mainContainer}>
-          <View style={styles.userDetails}>
-            {error && (
-              <Text style={{ color: "red", marginVertical: 8 }}>{error}</Text>
-            )}
-            <GenerateUserLogo
-              bgColor={bgColor}
-              fullName={fieldsData.fullName}
-              layoutSize={90}
-              fontSize={40}
-            />
-            <Text style={styles.profileChangeText}>Tap to change avatar</Text>
-            <View style={styles.availableAvatarConatiner}>
-              {avatarColors.map((avatarColor, idx) => (
-                <TouchableOpacity
-                  onPress={() => setBgColor(avatarColor)}
-                  key={idx}
-                >
-                  <GenerateUserLogo
-                    bgColor={avatarColor}
-                    fullName={fieldsData.fullName}
-                    layoutSize={50}
-                    fontSize={9}
-                  />
-                </TouchableOpacity>
-              ))}
+            <View style={styles.backArrow}>
+              <TouchableOpacity onPress={() => router.back()}>
+                <Ionicons name="arrow-back" size={20} color={COLORS.muted} />
+              </TouchableOpacity>
             </View>
           </View>
-          <View style={styles.userDetailsAndActionConatiner}>
-            <UnderlineInput
-              onChange={(text) => {
-                setFieldsData((prev) => ({ ...prev, fullName: text }));
-              }}
-              value={fieldsData.fullName}
-              label="Full Name"
-              error={fullNameErrMsg}
-            />
-            <UnderlineInput
-              onChange={(text) =>
-                setFieldsData((prev) => ({ ...prev, email: text }))
-              }
-              value={fieldsData.email}
-              label="Email"
-              error={emailErrMsg}
-            />
-            <UnderlineInput
-              onChange={(text) =>
-                setFieldsData((prev) => ({ ...prev, age: Number(text) }))
-              }
-              keyboardType="numeric"
-              value={fieldsData.age?.toString() ?? " "}
-              label="Age"
-              error={ageErrMsg}
-            />
-            <UnderlineInput
-              onChange={(text) => {
-                setFieldsData((prev) => ({ ...prev, profession: text }));
-              }}
-              value={fieldsData.profession}
-              label="Profession"
-              error={professionErrMsg}
-            />
-            {currUser.role === "ADMIN" && (
+        </View>
+        <ScrollView
+          contentContainerStyle={{ paddingBottom: 20 }} // ← important
+          keyboardShouldPersistTaps="handled" // ← tap karta keyboard band na thay
+          style={styles.scrollArea}
+        >
+          <View style={styles.mainContainer}>
+            <View style={styles.userDetails}>
+              {error && (
+                <Text style={{ color: "red", marginVertical: 8 }}>{error}</Text>
+              )}
+              <GenerateUserLogo
+                bgColor={bgColor}
+                fullName={fieldsData.fullName}
+                layoutSize={90}
+                fontSize={40}
+              />
+              <Text style={styles.profileChangeText}>Tap to change avatar</Text>
+              <View style={styles.availableAvatarConatiner}>
+                {avatarColors.map((avatarColor, idx) => (
+                  <TouchableOpacity
+                    onPress={() => setBgColor(avatarColor)}
+                    key={idx}
+                  >
+                    <GenerateUserLogo
+                      bgColor={avatarColor}
+                      fullName={fieldsData.fullName}
+                      layoutSize={50}
+                      fontSize={9}
+                    />
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+            <View style={styles.userDetailsAndActionConatiner}>
               <UnderlineInput
                 onChange={(text) => {
-                  setFieldsData((prev) => ({ ...prev, password: text }));
+                  setFieldsData((prev) => ({ ...prev, fullName: text }));
                 }}
-                value={fieldsData.password}
-                label="Password"
-                error={passwordErrMsg}
+                value={fieldsData.fullName}
+                label="Full Name"
+                error={fullNameErrMsg}
               />
-            )}
+              <UnderlineInput
+                onChange={(text) =>
+                  setFieldsData((prev) => ({ ...prev, email: text }))
+                }
+                value={fieldsData.email}
+                label="Email"
+                error={emailErrMsg}
+              />
+              <UnderlineInput
+                onChange={(text) =>
+                  setFieldsData((prev) => ({ ...prev, age: Number(text) }))
+                }
+                keyboardType="numeric"
+                value={fieldsData.age?.toString() ?? " "}
+                label="Age"
+                error={ageErrMsg}
+              />
+              <UnderlineInput
+                onChange={(text) => {
+                  setFieldsData((prev) => ({ ...prev, profession: text }));
+                }}
+                value={fieldsData.profession}
+                label="Profession"
+                error={professionErrMsg}
+              />
+              {currUser.role === "ADMIN" && (
+                <UnderlineInput
+                  onChange={(text) => {
+                    setFieldsData((prev) => ({ ...prev, password: text }));
+                  }}
+                  value={fieldsData.password}
+                  label="Password"
+                  error={passwordErrMsg}
+                />
+              )}
+            </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
 
-      {/* Action Button */}
-      <View style={styles.actionBtnConatiner}>
-        <Button
-          loading={loading}
-          onPress={onSubmit}
-          style={{
-            backgroundColor:
-              user?.role === "ADMIN"
-                ? COLORS.primary
-                : user?.bgColor || COLORS.primary,
-          }}
-        >
-          {!user
-            ? PLAINTEXT.addProfile.createProfileBtn
-            : PLAINTEXT.EditProfile.editBtn}
-        </Button>
-        {user?.userId && (
-          <Button isDiscard onPress={() => router.back()}>
-            Discard
+        {/* Action Button */}
+        <View style={styles.actionBtnConatiner}>
+          <Button
+            loading={loading}
+            onPress={onSubmit}
+            style={{
+              backgroundColor:
+                user?.role === "ADMIN"
+                  ? COLORS.primary
+                  : user?.bgColor || COLORS.primary,
+            }}
+          >
+            {!user
+              ? PLAINTEXT.addProfile.createProfileBtn
+              : PLAINTEXT.EditProfile.editBtn}
           </Button>
-        )}
+          {user?.userId && (
+            <Button isDiscard onPress={() => router.back()}>
+              Discard
+            </Button>
+          )}
+        </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

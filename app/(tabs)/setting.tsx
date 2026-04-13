@@ -13,13 +13,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const setting = () => {
   const router = useRouter();
-  const { user } = useContext(UserContext);
+  const { user, setProfile, setUser } = useContext(UserContext);
 
   const logoutHandler = async () => {
     try {
       await AsyncStorage.setItem("isLoggedIn", "false");
-
-      return router.push(`/${ROUTES.Login}`);
+      return router.replace(`/${ROUTES.Login}`);
     } catch (error) {
       console.error("Error fetching logged-in user data:", error);
     }
@@ -33,20 +32,20 @@ const setting = () => {
       <View style={styles.userDetails}>
         <View style={styles.logoAndUserTextCoantiner}>
           <GenerateUserLogo
-            bgColor={user.bgColor ? user.bgColor : COLORS.primary}
-            fullName={user.fullName}
+            bgColor={user?.bgColor ? user.bgColor : COLORS.primary}
+            fullName={user?.fullName ? user.fullName : ""}
             layoutSize={80}
             fontSize={30}
           />
           <View style={styles.userDetailsConatiner}>
-            <Text style={styles.userName}>{user.fullName}</Text>
+            <Text style={styles.userName}>{user?.fullName}</Text>
             {/* <View style={styles.dotAndProfilesCount}> */}
-            <Text style={styles.profileCountText}>{user.email}</Text>
+            <Text style={styles.profileCountText}>{user?.email}</Text>
             {/* </View> */}
           </View>
         </View>
       </View>
-      {user.role !== "ADMIN" && (
+      {user?.role !== "ADMIN" && (
         <View style={styles.account}>
           <Text style={styles.headingTwo}>
             {PLAINTEXT.setting.account.account}
@@ -55,7 +54,7 @@ const setting = () => {
             <Link
               href={{
                 pathname: `/${ROUTES.EdtiProfile}`,
-                params: { userId: user.userId },
+                params: { userId: user?.userId },
               }}
             >
               <View style={styles.innerIconAndTextContainer}>
@@ -69,7 +68,7 @@ const setting = () => {
             <Link
               href={{
                 pathname: `/${ROUTES.ChangePassword}`,
-                params: { userId: user.userId },
+                params: { userId: user?.userId },
               }}
             >
               <View
@@ -118,7 +117,7 @@ const setting = () => {
       <View style={styles.logOutBtnConatiner}>
         <Button
           onPress={logoutHandler}
-          style={{ backgroundColor: user.bgColor }}
+          style={{ backgroundColor: user?.bgColor }}
         >
           Logout
         </Button>

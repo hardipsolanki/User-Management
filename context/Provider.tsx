@@ -24,10 +24,7 @@ const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
       const curUser: any = await AsyncStorage.getItem("currUser");
       const currentUserObject = JSON.parse(curUser);
       const availableUserProfile = initalProfiles?.filter(
-        (p) =>
-          p.email !== admin.adminEmail &&
-          (currentUserObject.role !== "USER" ||
-            p.email !== currentUserObject.email),
+        (p) => p.email !== admin.adminEmail,
       );
       setUser(currentUserObject);
       setProfile(availableUserProfile || []);

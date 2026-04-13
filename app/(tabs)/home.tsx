@@ -5,13 +5,24 @@ import { ROUTES } from "@/constants/routesName";
 import { PLAINTEXT } from "@/constants/text";
 import { UserContext } from "@/context/UserContext";
 import { Link, useRouter } from "expo-router";
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Index = () => {
+  const { user, profiles, setProfile, setUser } = useContext(UserContext);
+
+  useEffect(() => {
+    if (profiles && profiles?.length > 0) {
+      setInitlizedProfiles(profiles?.filter((p) => p.email !== user?.email));
+    }
+  }, [profiles?.length]);
+
+  const [initlizedProfiles, setInitlizedProfiles] = useState(
+    profiles?.filter ? profiles?.filter((p) => p.email !== user?.email) : [],
+  );
   const router = useRouter();
-  const { user, profiles } = useContext(UserContext);
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.profileHeader}>
@@ -26,7 +37,7 @@ const Index = () => {
         </View>
       </View>
       <View style={styles.mainConatiner}>
-        {user.role === "ADMIN" && (
+        {user?.role === "ADMIN" && (
           <Button onPress={() => router.push(`/${ROUTES.AddProfile}`)}>
             {PLAINTEXT.home.addProfileBtn}
           </Button>
@@ -34,7 +45,7 @@ const Index = () => {
         <Text style={styles.userText}>{PLAINTEXT.home.Users}</Text>
         <View style={styles.profilesRenderConatiner}>
           <FlatList
-            data={profiles}
+            data={initlizedProfiles}
             renderItem={({ item }) => (
               <Link
                 href={{
